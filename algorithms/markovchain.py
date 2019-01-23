@@ -6,7 +6,7 @@ class Markov_Chain:
         self.training_data = training_data
 
         # Finds all the existing states in the training data
-        self.states = self.get_states()
+        self.states = self.get_states(self.order)
 
         # Finds all possible transitions from states
         self.transitions = self.get_transitions()
@@ -14,12 +14,14 @@ class Markov_Chain:
         # Finds all transition probabilites
         self.matrix = self.get_matrix()
 
-    def get_states(self):
+    def get_states(self, order):
         states = []
         for sequence in self.training_data:
-            for state in sequence:
-                if state not in states:
-                    states.append(state)
+            chunks = [sequence[x:x+order] for x in range(0, len(sequence), order)]
+            for chunk in chunks:
+                if chunk[0] not in states:
+                    states.append("".join(chunk))
+        print(states)
         return sorted(states)
 
     def get_transitions(self):
