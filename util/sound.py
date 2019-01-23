@@ -69,10 +69,10 @@ class Sound:
 
     def get_notes(self, scale, octave):
         notes = []
-        self.octave = octave
+        self.octave = octave + 1
         for degree in self.scale_degrees:
             if degree >= self.notes_list.index("c") and self.key is not "c":
-                self.octave = octave + 1
+                self.octave = octave + 2
             note = self.notes_dict[self.notes_list[degree]] * (2**self.octave)
             if self.sound == "synth":
                 notes.append(Sine(freq=note, phase=0, mul=0.1))
