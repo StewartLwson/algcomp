@@ -6,7 +6,7 @@ class Markov_Chain:
         self.training_data = training_data
 
         # Finds all the existing states in the training data
-        self.states = self.get_states(self.order)
+        self.states = self.get_states()
 
         # Finds all possible transitions from states
         self.transitions = self.get_transitions()
@@ -14,14 +14,14 @@ class Markov_Chain:
         # Finds all transition probabilites
         self.matrix = self.get_matrix()
 
-    def get_states(self, order):
+    def get_states(self):
         states = []
         for sequence in self.training_data:
-            chunks = [sequence[x:x+order] for x in range(0, len(sequence), order)]
+            chunks = [sequence[x:x+self.order] for x in range(0, len(sequence), self.order)]
             for chunk in chunks:
-                if chunk[0] not in states:
-                    states.append("".join(chunk))
-        print(states)
+                chunk_string = "".join(chunk)
+                if chunk_string not in states:
+                    states.append(chunk_string)
         return sorted(states)
 
     def get_transitions(self):
@@ -35,15 +35,21 @@ class Markov_Chain:
 
     def get_matrix(self):
         # Matrix of transition probabilties (initially all set to 0)
-        matrix = np.zeros([3, 3])
+        matrix = np.zeros([len(self.states), len(self.states)])
         # List of all exisiting transitions in input composition
         changes = []
 
         # Iterates through input composition and adds each transition to the list
-        for i in range(len(self.training_data)):
-            for j in range(len(self.training_data[i])):
-                if j < len(self.training_data[i]) - 1:
-                    changes.append(self.training_data[i][j] + self.training_data[i][j+1])
+        for sequence in self.training_data:
+            chunks = [sequence[x:x+self.order * 2] for x in range(0, len(sequence), self.order)]
+            for chunk in chunks:
+                if len(chunk) == self.order * 2:
+                    changes.append("".join(chunk))
+                else:
+                    for chord in sequence[0:self.order]:
+                        chunk.append(chord)
+                    chunks.append("".join(chunk))
+
         # Iterates through transition list and adds to the matrix each time a
         # corresponding transition exists
         for c in changes:
@@ -59,21 +65,27 @@ class Markov_Chain:
             if int(num) is not 0:
                 for i in range(len(matrix[m])):
                     matrix[m][i] = (matrix[m][i] / num)
-
+        print(matrix)
         return matrix
 
     def generate_comp(self, length, start):
+        if len(start) != self.order:
+            print("Starting sequence is not of order " + str(self.order))
+            return
         current = start
-        comp = [current]
+        comp = []
+        for chord in current:
+            comp.append(chord)
         i = 0
         row = 0
-        while i != length:
-            for chord in self.states:
-                if current is chord:
-                    row = self.states.index(chord)
+        while i < length - 1:
+            for state in self.states:
+                if current == state:
+                    row = self.states.index(state)
             change = np.random.choice(self.transitions[row], replace=True, p=self.matrix[row])
-            current = change[1]
-            comp.append(change[1])
+            current = change[self.order:self.order * 2]
+            for chord in current:
+                comp.append(chord)
             i += 1
-        print("Compositon of " + str(length) + " chords: " + str(comp))
+        print("Compositon of " + str(len(comp)) + " chords: " + str(comp))
         return comp
