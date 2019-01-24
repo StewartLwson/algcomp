@@ -58,7 +58,6 @@ class Cellular_Automata:
                         sum = (sum + num) % 13
                     if sum in scale and len(bar) < npb:
                         bar.append(int(sum))
-            print(bar)
             for note in bar:
                 sequence.append(note)
         print("Composition: " + str(sequence))

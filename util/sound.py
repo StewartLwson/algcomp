@@ -41,7 +41,7 @@ class Sound:
         self.octave = octave
 
         # Chords according to given scale starting at given octave
-        self.chords = self.get_chords(self.scale, self.octave)
+        self.chords = self.get_chords(self.octave)
 
         # Notes according to given scale starting at given octave
         self.notes = self.get_notes(self.scale, self.octave + 1)
@@ -53,10 +53,15 @@ class Sound:
         for _ in range(start):
             self.notes_list.append(self.notes_list.pop(0))
 
-    def get_chords(self, scale, octave):
+    def get_chords(self, octave):
         chords = []
+        scale = []
         self.octave = octave
-        for degree in self.scale_degrees:
+        if "minor" in self.scale:
+            scale = self.scales_dict["minor"]
+        elif "major" in self.scale:
+            scale = self.scales_dict["major"]
+        for degree in scale:
             if degree >= self.notes_list.index("c") and self.key is not "c":
                 self.octave = octave + 1
             note = self.notes_dict[self.notes_list[degree]] * (2**self.octave)
