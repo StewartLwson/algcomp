@@ -1,18 +1,25 @@
 import numpy as np
+import json
+import hashlib
 
 class Markov_Chain:
-    def __init__(self, training_data, order = 1):
+    def __init__(self, training_data, retrain = True, order = 1, training = ""):
         self.order = order
-        self.training_data = training_data
+        if(retrain):
+            self.training_data = training_data
+            # Finds all the existing states in the training data
+            self.states = self.get_states()
 
-        # Finds all the existing states in the training data
-        self.states = self.get_states()
+            # Finds all possible transitions from states
+            self.transitions = self.get_transitions()
 
-        # Finds all possible transitions from states
-        self.transitions = self.get_transitions()
+            # Finds all transition probabilites
+            self.matrix = self.get_matrix()
 
-        # Finds all transition probabilites
-        self.matrix = self.get_matrix()
+            self.save_training()
+        else:
+            self.training = training
+            self.load_training()
 
     def get_states(self):
         states = []
@@ -65,8 +72,28 @@ class Markov_Chain:
             if int(num) is not 0:
                 for i in range(len(matrix[m])):
                     matrix[m][i] = (matrix[m][i] / num)
-        print(matrix)
         return matrix
+
+    def save_training(self):
+        filename = str(hashlib.sha1(str(self.training_data).encode("utf-8")).hexdigest())
+        path = "./training/" + filename + ".json"
+
+        data = {
+            "states": self.states,
+            "transitions": self.transitions,
+            "matrix": self.matrix.tolist()
+        }
+        with open(path, "w") as outfile:
+            json.dump(data, outfile)
+
+    def load_training(self):
+        path = "./training/" + self.training + ".json"
+        data = {}
+        with open(path, "r") as infile:
+            data = json.load(infile)
+        self.states = data["states"]
+        self.transitions = data["transitions"]
+        self.matrix = data["matrix"]
 
     def generate_comp(self, length, start):
         if len(start) != self.order:
