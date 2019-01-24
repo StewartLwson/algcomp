@@ -22,8 +22,18 @@ class Cellular_Automata:
         # Starting state of CA
         self.starting_state = np.zeros([self.columns+2])
         self.starting_state[int(self.columns/2)+1] = 1
-        self.set_starting_state(starting_state)
+        self.set_starting_state(self.starting_state)
 
+    def set_starting_state(self, state):
+        self.grid[0] = state
+
+    def generate_starting_state(self):
+        self.starting_state = np.zeros([self.columns+2])
+        for i, _ in enumerate(self.starting_state):
+            self.starting_state[i] = np.random.randint(0, 2)
+        self.set_starting_state(self.starting_state)
+
+    def evolve(self):
         # Applies rule to grid according to starting position
         for i in np.arange(0, self.rows-1):
             for j in np.arange(0, self.columns):
@@ -31,25 +41,23 @@ class Cellular_Automata:
                     if np.array_equal(self.input_pattern[k, :], self.grid[i, j:j+3]):
                         self.grid[i+1, j+1] = self.output_pattern[k]
 
-    def set_starting_state(self, state):
-        self.grid[0] = state
-
-    def generate_starting_state(self):
-        self.starting_state = np.zeros([self.columns+2])
-        for i, v in enumerate(self.starting_state):
-            self.starting_state[i] = np.random.randint(0, 2)
-        print(self.starting_state)
-        self.set_starting_state(self.starting_state)
 
     # Algorithm for generating compositions. The sum of the alive cells every
     # generation is recording and checked if it exists in the scale.
-    def generate_melody(self, scale, length = 12):
+    def generate_melody(self, scale, bars = 12):
         sequence = []
-        for c in self.grid:
-            sum = 0
-            for num in c:
-                sum = (sum + num) % 13
-            if sum in scale and len(sequence) <= length:
-                sequence.append(int(sum))
+        for _ in range(bars):
+            bar = []
+            self.rule = np.random.randint(0, 255)
+            self.generate_starting_state()
+            self.evolve()
+            for c in self.grid:
+                sum = 0
+                for num in c:
+                    sum = (sum + num) % 13
+                if sum in scale and len(bar) < 4:
+                    bar.append(int(sum))
+            for note in bar:
+                sequence.append(note)
         print("Composition: " + str(sequence))
         return sequence
