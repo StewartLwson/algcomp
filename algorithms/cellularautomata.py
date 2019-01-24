@@ -1,4 +1,5 @@
 import numpy as np
+from .geneticalgorithm import Genetic_Algorithm
 
 class Cellular_Automata:
     def __init__(self, starting_state = 1, rule = 150, steps = 100):
@@ -60,5 +61,7 @@ class Cellular_Automata:
                         bar.append(int(sum))
             for note in bar:
                 sequence.append(note)
-        print("Composition: " + str(sequence))
+        ga = Genetic_Algorithm()
+        fitness = ga.fitness(sequence)
+        print("Composition: " + str(sequence) + " with fitness " + str(fitness))
         return sequence
