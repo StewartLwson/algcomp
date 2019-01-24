@@ -22,8 +22,8 @@ class Sound:
 
         # Scale degrees
         self.scales_dict = { "major": [0, 2, 4, 5, 7, 9, 11],
-        "minor": [0, 2, 3, 5, 7, 8, 10], "minor_pent": [0, 3, 7, 10],
-        "minor_blues": [0, 3, 6, 7, 10] }
+        "minor": [0, 2, 3, 5, 7, 8, 10], "minor_pent": [0, 3, 5, 7, 10],
+        "minor_blues": [0, 3, 5, 6, 7, 10] }
 
         # Name of scale being used to be looked up in dictionary
         self.scale = scale
