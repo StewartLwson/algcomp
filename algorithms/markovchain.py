@@ -13,9 +13,9 @@ class Markov_Chain:
     # order is the size of the n-gram or length of chords sequence for the model
     # training is the name of the JSON file where previous training has been stored
     def __init__(self, training_data, retrain = True, order = 1, training = ""):
+        self.order = order
         if(retrain):
             self.training_data = training_data
-            self.order = order
 
             # Existing states in the training data
             self.states = self.get_states()
@@ -139,11 +139,10 @@ class Markov_Chain:
         for chord in current:
             comp.append(chord)
 
-        i = 0
         row = 0
 
         # Appends to compositions as long as the length has not been bypassed
-        while i < length - 1:
+        for _ in range(length - 1):
             for state in self.states:
                 if current == state:
                     row = self.states.index(state)
@@ -155,8 +154,6 @@ class Markov_Chain:
             current = change[self.order:self.order * 2]
             for chord in current:
                 comp.append(chord)
-
-            i += 1
 
         print("Compositon of " + str(len(comp)) + " chords: " + str(comp))
         return comp
