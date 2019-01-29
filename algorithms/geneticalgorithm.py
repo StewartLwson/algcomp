@@ -3,7 +3,7 @@ import numpy as np
 import operator
 
 class Genetic_Algorithm:
-    def __init__(self, scale, population_size = 20, best_sample = 2, lucky_few = 1, npb = 1):
+    def __init__(self, scale, population_size = 20, best_sample = 2, lucky_few = 1, npb = 1, chance = 50):
         self.scale = scale
         self.npb = npb
         self.population_size = population_size
@@ -12,6 +12,8 @@ class Genetic_Algorithm:
         self.lucky_few = lucky_few
         self.parents = self.tournament_selection(self.first_population)
         self.children = self.singlepoint_crossover(self.parents)
+        self.mutate(self.children, chance)
+
 
     def fitness(self, melody):
         score = 0
@@ -83,12 +85,19 @@ class Genetic_Algorithm:
         children = []
         for couple in parents:
             split1 = couple[0][0:point]
-            print(split1)
             split2 = couple[1][point:12]
-            print(split2)
             child = split1 + split2
             children.append(child)
+        print(children)
         return children
+
+    def mutate(self, population, chance):
+        index = np.random.randint(0, 11)
+        for individual in population:
+            if np.random.randint(0, 100) < chance:
+                print(individual)
+                individual[index] = np.random.choice(self.scale)
+                print(individual)
 
 
 
