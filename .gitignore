@@ -1,4 +1,6 @@
 algorithms/__pycache__
 util/__pycache__
 objectdb
+
 main.py
+ga_test.py

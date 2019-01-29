@@ -3,12 +3,13 @@ import numpy as np
 import operator
 
 class Genetic_Algorithm:
-    def __init__(self, scale, population_size = 5, best_sample = 2, lucky_few = 1):
+    def __init__(self, scale, population_size = 10, best_sample = 2, lucky_few = 1):
         self.scale = scale
         self.population_size = population_size
         self.first_population = self.generate_first_population()
         self.best_sample = best_sample
         self.lucky_few = lucky_few
+        self.parents = self.tournament_selection(self.first_population)
 
     def fitness(self, melody):
         score = 0
@@ -45,19 +46,34 @@ class Genetic_Algorithm:
             population.append(melody)
         return population
 
-    def selection(self):
+    # Selects the best individuals in a population plus a lucky few
+    def best_selection(self):
         sorted_population = {}
         next_gen = []
         for sequence in self.first_population:
             sorted_population[str(sequence)] = self.fitness(sequence)
         sorted_population = sorted(sorted_population.items(), key = operator.itemgetter(1), reverse = True)
-        print(sorted_population)
         for i in range(self.best_sample):
             next_gen.append(sorted_population[i][0])
         for i in range(self.lucky_few):
             next_gen.append(sorted_population[np.random.randint(self.best_sample, self.population_size - 1)][0])
         np.random.shuffle(next_gen)
         return next_gen
+
+    # Selects the best individuals by splitting population into groups of two and
+    # choosing fitter individual
+    def tournament_selection(self, population):
+        tournaments = [population[x:x+2] for x in range(0, len(population), 2)]
+        winners = []
+        for tournament in tournaments:
+            fitness1 = self.fitness(tournament[0])
+            fitness2 = self.fitness(tournament[1])
+            best_score = max(fitness1, fitness2)
+            if fitness1 == best_score:
+                winners.append(tournament[0])
+            else:
+                winners.append(tournament[1])
+        return winners
 
 
 
