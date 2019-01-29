@@ -3,13 +3,15 @@ import numpy as np
 import operator
 
 class Genetic_Algorithm:
-    def __init__(self, scale, population_size = 10, best_sample = 2, lucky_few = 1):
+    def __init__(self, scale, population_size = 20, best_sample = 2, lucky_few = 1, npb = 1):
         self.scale = scale
+        self.npb = npb
         self.population_size = population_size
-        self.first_population = self.generate_first_population()
+        self.first_population = self.generate_first_population(self.npb)
         self.best_sample = best_sample
         self.lucky_few = lucky_few
         self.parents = self.tournament_selection(self.first_population)
+        self.children = self.singlepoint_crossover(self.parents)
 
     def fitness(self, melody):
         score = 0
@@ -38,11 +40,11 @@ class Genetic_Algorithm:
         else:
             return -1 - (1 / score)
 
-    def generate_first_population(self):
+    def generate_first_population(self, npb):
         population = []
         ca = Cellular_Automata()
         for _ in range(self.population_size):
-            melody = ca.generate_melody(self.scale, bars = 12, npb = 1)
+            melody = ca.generate_melody(self.scale, bars = 12, npb = npb)
             population.append(melody)
         return population
 
@@ -75,6 +77,18 @@ class Genetic_Algorithm:
                 winners.append(tournament[1])
         return winners
 
+    def singlepoint_crossover(self, winners):
+        point = np.random.randint(1, 10)
+        parents = [winners[x:x+2] for x in range(0, len(winners), 2)]
+        children = []
+        for couple in parents:
+            split1 = couple[0][0:point]
+            print(split1)
+            split2 = couple[1][point:12]
+            print(split2)
+            child = split1 + split2
+            children.append(child)
+        return children
 
 
 
