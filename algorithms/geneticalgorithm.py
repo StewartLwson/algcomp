@@ -57,7 +57,6 @@ class Genetic_Algorithm:
         for sequence in self.population:
             sorted_population[str(sequence)] = self.fitness(sequence)
         sorted_population = sorted(sorted_population.items(), key = operator.itemgetter(1), reverse = True)
-        print(sorted_population[0])
         return sorted_population
 
     # Selects the best individuals in a population plus a lucky few
@@ -119,6 +118,12 @@ class Genetic_Algorithm:
         for individual in population:
             if np.random.randint(0, 100) < chance:
                 individual[index] = np.random.choice(self.scale)
+    
+    def get_individuals(self, size):
+        individuals = []
+        for i in range(size):
+            individuals.append(self.population[i])
+        return individuals
 
 
 
