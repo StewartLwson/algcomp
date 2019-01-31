@@ -1,6 +1,8 @@
-algorithms/__pycache__
-util/__pycache__
-objectdb
+__pycache__
+__init__.py
+
+.vscode
 
 main.py
-ga_test.py
+
+test
