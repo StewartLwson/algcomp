@@ -3,16 +3,18 @@ import numpy as np
 import operator
 
 class Genetic_Algorithm:
-    def __init__(self, scale, population_size = 20, best_sample = 2, lucky_few = 1, npb = 1, chance = 50):
+    def __init__(self, scale, generations = 5, population_size = 20, best_sample = 2, lucky_few = 1, npb = 4, chance = 50):
         self.scale = scale
         self.npb = npb
         self.population_size = population_size
-        self.first_population = self.generate_first_population(self.npb)
+        self.population = self.generate_first_population(self.npb)
         self.best_sample = best_sample
         self.lucky_few = lucky_few
-        self.parents = self.tournament_selection(self.first_population)
-        self.children = self.singlepoint_crossover(self.parents)
-        self.mutate(self.children, chance)
+        for _ in range(generations):
+            self.parents = self.tournament_selection(self.population)
+            self.population = self.singlepoint_crossover(self.parents)
+            self.mutate(self.population, chance)
+        self.sort_population()
 
 
     def fitness(self, melody):
@@ -50,11 +52,19 @@ class Genetic_Algorithm:
             population.append(melody)
         return population
 
+    def sort_population(self):
+        sorted_population = {}
+        for sequence in self.population:
+            sorted_population[str(sequence)] = self.fitness(sequence)
+        sorted_population = sorted(sorted_population.items(), key = operator.itemgetter(1), reverse = True)
+        print(sorted_population[0])
+        return sorted_population
+
     # Selects the best individuals in a population plus a lucky few
     def best_selection(self):
         sorted_population = {}
         next_gen = []
-        for sequence in self.first_population:
+        for sequence in self.population:
             sorted_population[str(sequence)] = self.fitness(sequence)
         sorted_population = sorted(sorted_population.items(), key = operator.itemgetter(1), reverse = True)
         for i in range(self.best_sample):
@@ -67,37 +77,48 @@ class Genetic_Algorithm:
     # Selects the best individuals by splitting population into groups of two and
     # choosing fitter individual
     def tournament_selection(self, population):
-        tournaments = [population[x:x+2] for x in range(0, len(population), 2)]
         winners = []
+        if len(population) % 2 != 0:
+            #winners.append(population[len(population) - 1])
+            del population[len(population) - 1]
+        tournaments = [population[x:x+2] for x in range(0, len(population), 2)]
+
         for tournament in tournaments:
             fitness1 = self.fitness(tournament[0])
             fitness2 = self.fitness(tournament[1])
             best_score = max(fitness1, fitness2)
             if fitness1 == best_score:
                 winners.append(tournament[0])
+                print("Winner: " + str(tournament[0]))
             else:
                 winners.append(tournament[1])
+                print("Winner: " + str(tournament[1]))
         return winners
 
     def singlepoint_crossover(self, winners):
+        children = winners
+        if len(winners) % 2 != 0:
+            del winners[len(winners) - 1]
         point = np.random.randint(1, 10)
         parents = [winners[x:x+2] for x in range(0, len(winners), 2)]
-        children = []
+
         for couple in parents:
             split1 = couple[0][0:point]
-            split2 = couple[1][point:12]
-            child = split1 + split2
-            children.append(child)
-        print(children)
+            split2 = couple[1][point:12*self.npb]
+            child1 = split1 + split2
+            split1 = couple[0][0:len(couple[0]) - point]
+            split2 = couple[1][len(couple[0]) - point:12*self.npb]
+            child2 = split1 + split2
+            children.append(child1)
+            children.append(child2)
+        print("Next generation: " + str(children))
         return children
 
     def mutate(self, population, chance):
         index = np.random.randint(0, 11)
         for individual in population:
             if np.random.randint(0, 100) < chance:
-                print(individual)
                 individual[index] = np.random.choice(self.scale)
-                print(individual)
 
 
 
