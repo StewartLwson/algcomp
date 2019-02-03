@@ -3,11 +3,12 @@ import numpy as np
 import operator
 
 class Genetic_Algorithm:
-    def __init__(self, scale, generations = 5, population_size = 20, best_sample = 2, lucky_few = 1, npb = 4, chance = 50):
+    def __init__(self, scale, generations = 5, population_size = 20, best_sample = 2, lucky_few = 1, rule = 150, npb = 4, chance = 50):
         self.scale = scale
         self.npb = npb
+        self.rule = rule
         self.population_size = population_size
-        self.population = self.generate_first_population(self.npb)
+        self.population = self.generate_first_population(self.npb, self.rule)
         self.best_sample = best_sample
         self.lucky_few = lucky_few
         for _ in range(generations):
@@ -49,11 +50,11 @@ class Genetic_Algorithm:
         else:
             return -1 - (1 / score)
 
-    def generate_first_population(self, npb):
+    def generate_first_population(self, npb, rule):
         population = []
         ca = Cellular_Automata()
         for _ in range(self.population_size):
-            melody = ca.generate_melody(self.scale, bars = 12, npb = npb)
+            melody = ca.generate_melody(self.scale, bars = 12, npb = npb, rule = rule)
             population.append(melody)
         return population
 
