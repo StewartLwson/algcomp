@@ -3,16 +3,17 @@ import numpy as np
 import operator
 
 class Genetic_Algorithm:
-    def __init__(self, scale, generations = 5, population_size = 20, best_sample = 2, lucky_few = 1, npb = 4, chance = 50):
+    def __init__(self, scale, generations = 5, population_size = 20, best_sample = 2, lucky_few = 1, rule = 150, npb = 4, chance = 50):
         self.scale = scale
         self.npb = npb
+        self.rule = rule
         self.population_size = population_size
-        self.population = self.generate_first_population(self.npb)
+        self.population = self.generate_first_population(self.npb, self.rule)
         self.best_sample = best_sample
         self.lucky_few = lucky_few
         for _ in range(generations):
             self.parents = self.tournament_selection(self.population)
-            self.population = self.singlepoint_crossover(self.parents)
+            self.population = self.multipoint_crossover(self.parents)
             self.mutate(self.population, chance)
         self.sort_population()
 
@@ -37,6 +38,11 @@ class Genetic_Algorithm:
                     score += 1
                 else:
                     score -= 1
+            if v == "-":
+                for x in range(0, self.npb):
+                    if c + x < len(melody):
+                        if melody[c + x] == "-":
+                            score -= 1
         if score == 0:
             return 0
         elif score > 0:
@@ -44,11 +50,11 @@ class Genetic_Algorithm:
         else:
             return -1 - (1 / score)
 
-    def generate_first_population(self, npb):
+    def generate_first_population(self, npb, rule):
         population = []
         ca = Cellular_Automata()
         for _ in range(self.population_size):
-            melody = ca.generate_melody(self.scale, bars = 12, npb = npb)
+            melody = ca.generate_melody(self.scale, bars = 12, npb = npb, rule = rule)
             population.append(melody)
         return population
 
@@ -95,23 +101,49 @@ class Genetic_Algorithm:
         return winners
 
     def singlepoint_crossover(self, winners):
-        children = winners
-        if len(winners) % 2 != 0:
-            del winners[len(winners) - 1]
+        leftover = []
+        if len(winners) % 2 == 0:
+            children = winners
+        else:
+            children = winners[:len(winners) - 2]
+            leftover = winners[len(winners) - 1]
         point = np.random.randint(1, 10)
         parents = [winners[x:x+2] for x in range(0, len(winners), 2)]
 
         for couple in parents:
-            split1 = couple[0][0:point]
-            split2 = couple[1][point:12*self.npb]
-            child1 = split1 + split2
-            split1 = couple[0][0:len(couple[0]) - point]
-            split2 = couple[1][len(couple[0]) - point:12*self.npb]
-            child2 = split1 + split2
-            children.append(child1)
-            children.append(child2)
+            for c, _ in enumerate(couple):
+                split1 = couple[c % 2][0:point]
+                split2 = couple[(c + 1) % 2][point:12*self.npb]
+                print(str(split1 + split2))
+        children + leftover
         print("Next generation: " + str(children))
         return children
+
+    def multipoint_crossover(self, winners):
+        leftover = []
+        if len(winners) % 2 == 0:
+            children = winners
+        else:
+            children = winners[:len(winners) - 2]
+            leftover = winners[len(winners) - 1]
+        parents = [winners[x:x+2] for x in range(0, len(winners), 2)]
+
+        for couple in parents:
+            child1 = []
+            child2 = []
+            for x in range(0, len(couple[0]), self.npb):
+                chance = np.random.randint(0, 1)
+                if chance == 0:
+                    child1 = child1 + couple[0][x:x+self.npb]
+                    child2 = child2 + couple[1][x:x+self.npb]
+                else:
+                    child1 = child1 + couple[1][x:x+self.npb]
+                    child2 = child2 + couple[0][x:x+self.npb]
+            children.append(child1)
+            children.append(child2)
+        children + leftover
+        return children
+
 
     def mutate(self, population, chance):
         index = np.random.randint(0, 11)
