@@ -55,7 +55,6 @@ class Cellular_Automata:
             bar = []
             if random:
                 self.rule = np.random.randint(0, 255)
-            print(self.rule)
             self.generate_starting_state()
             self.evolve()
             for generation in self.grid:
