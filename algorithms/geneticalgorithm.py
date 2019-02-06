@@ -273,7 +273,7 @@ class Genetic_Algorithm:
             child1 = []
             child2 = []
             for x in range(0, len(couple[0]), self.npb):
-                chance = np.random.randint(0, 1)
+                chance = np.random.randint(0, 2)
                 if chance == 0:
                     child1 = child1 + couple[0][x:x+self.npb]
                     child2 = child2 + couple[1][x:x+self.npb]

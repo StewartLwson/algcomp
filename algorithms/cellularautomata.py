@@ -44,16 +44,18 @@ class Cellular_Automata:
 
     # Algorithm for generating compositions. The sum of the alive cells every
     # generation is recording and checked if it exists in the scale.
-    def generate_melody(self, scale, bars = 12, npb = 4, rest_chance = 20, rule = 150):
+    def generate_melody(self, scale, bars = 12, npb = 4, rest_chance = 20, rule = 150, apply_rule = "all"):
         sequence = []
-        random = False
-        if rule == "random":
-            random = True
-        else:
+        if apply_rule == "all":
             self.rule = rule
+        elif apply_rule == "sequence" or apply_rule == "bar":
+            self.rule = np.random.randint(0, 255)
+        else:
+            print("Invalid string for apply_rule. Please use all, sequence or bar.")
+            return
         for _ in range(bars):
             bar = []
-            if random:
+            if apply_rule == "bar":
                 self.rule = np.random.randint(0, 255)
             self.generate_starting_state()
             self.evolve()
