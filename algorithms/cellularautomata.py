@@ -48,7 +48,7 @@ class Cellular_Automata:
 
     # Algorithm for generating compositions. The sum of the alive cells every
     # generation is recording and checked if it exists in the scale.
-    def generate_melody(self):
+    def generate_melody(self, npb = 4):
         sequence = []
         if self.apply_rule == "sequence":
             self.rule = np.random.randint(0, 255)
@@ -65,36 +65,43 @@ class Cellular_Automata:
                 sum = sum % 13
                 if sum in self.scale:
                     bar.append(int(sum))
-                if len(bar) >= self.npb:
+                if len(bar) >= npb:
                     break
             for note in bar:
                 sequence.append(note)
         print("Composition: " + str(sequence))
         return sequence
 
-    def target_notes(self):
-        self.npb = 1
-        target_notes = self.generate_melody()
+    def generate_target_notes(self):
+        target_notes = self.generate_melody(npb = 1)
         melody = []
         for c, note in enumerate(target_notes):
             melody.append(note)
+            notes = self.scale
             if c < len(target_notes) - 1:
                 target = target_notes[c + 1]
             else:
                 target = 0
             if note < target:
                 notes = self.scale[self.scale.index(note):self.scale.index(target)]
-                for _ in range(3):
-                    melody.append(np.random.choice(notes))
             elif note > target:
                 notes = self.scale[self.scale.index(target) + 1:self.scale.index(note) + 1]
-                for _ in range(3):
-                    melody.append(np.random.choice(notes))
-            else:
-                for _ in range(3):
-                    melody.append(np.random.choice(self.scale))
+            for i in range(self.npb - 1):
+                melody.append(notes[i % len(notes)])
         print("Composition: " + str(melody))
         return melody
+
+    def generate_blues_melody(self):
+        self.bars = 2
+        call = self.generate_target_notes()
+        response = self.generate_target_notes()
+        melody = []
+        for _ in range(2):
+            melody += call + response
+        call = self.generate_target_notes()
+        melody += call + response
+        return melody
+
 
 
 

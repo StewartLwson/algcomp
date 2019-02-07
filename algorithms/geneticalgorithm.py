@@ -124,7 +124,7 @@ class Genetic_Algorithm:
 
         """
         score = 0
-        score += self.musical_fitness(melody)
+        score += self.musical_fitness(melody) * 100
         if style == "blues":
             score += self.blues_fitness(melody)
 
@@ -149,9 +149,9 @@ class Genetic_Algorithm:
 
         """
         population = []
-        ca = Cellular_Automata()
+        ca = Cellular_Automata(scale=self.scale)
         for _ in range(self.population_size):
-            melody = ca.generate_melody(self.scale, bars = 12, npb = npb, rule = rule)
+            melody = ca.generate_blues_melody()
             population.append(melody)
         return population
 
@@ -284,7 +284,6 @@ class Genetic_Algorithm:
             children.append(child2)
         children.append(leftover)
         return children
-
 
     def mutate(self, individual, chance):
         """
