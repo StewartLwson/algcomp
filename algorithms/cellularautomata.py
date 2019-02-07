@@ -72,6 +72,25 @@ class Cellular_Automata:
         print("Composition: " + str(sequence))
         return sequence
 
+    def generate_rhythm(self, bars = 2):
+        sequence = []
+        self.rule = np.random.randint(0, 255)
+        self.generate_starting_state()
+        self.evolve()
+        for generation in self.grid:
+            sum = 0
+            for num in generation:
+                sum = sum + num
+            sum = sum % 2
+            if sum == 0:
+                sequence.append("-")
+            else:
+                sequence.append(0)
+            if len(sequence) >= 2 * self.npb:
+                break
+        return sequence
+
+
     def generate_target_notes(self):
         target_notes = self.generate_melody(npb = 1)
         melody = []
@@ -93,8 +112,13 @@ class Cellular_Automata:
 
     def generate_blues_melody(self):
         self.bars = 2
+        rhythm = self.generate_rhythm()
         call = self.generate_target_notes()
         response = self.generate_target_notes()
+        for c, note in enumerate(zip(call, response, rhythm)):
+            if note[2] == "-":
+                call[c] = "-"
+                response[c] = "-"
         melody = []
         for _ in range(2):
             melody += call + response
