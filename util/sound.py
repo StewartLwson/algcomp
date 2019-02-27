@@ -89,9 +89,12 @@ class Sound:
     def play_comp(self, comp, bpm=60):
         self.pyo.start()
         for chord in comp:
-            self.chords[int(chord) - 1].out()
-            time.sleep(60 / bpm)
-            self.chords[int(chord) - 1].stop()
+            if chord == "-":
+                time.sleep(60 / bpm)
+            else:
+                self.chords[int(chord) - 1].out()
+                time.sleep(60 / bpm)
+                self.chords[int(chord) - 1].stop()
         self.pyo.stop()
 
     def play_melody(self, melody, bpm=60):
@@ -111,7 +114,10 @@ class Sound:
         melody_start = 0
         line = int(len(melody) / len(comp))
         for chord in comp:
-            self.chords[int(chord) - 1].out()
+            if chord == "-":
+                Sine(freq=0).out()
+            else:
+                self.chords[int(chord) - 1].out()
             for note in melody[melody_start:melody_start + line]:
                 if note == "-":
                     time.sleep(60 / (bpm * line))
@@ -120,7 +126,10 @@ class Sound:
                     self.notes[j].out()
                     time.sleep(60 / (bpm * line))
                     self.notes[j].stop()
-            self.chords[int(chord) - 1].stop()
+            if chord == "-":
+                Sine(freq=0).stop()
+            else:
+                self.chords[int(chord) - 1].stop()
             melody_start = melody_start + line
         self.pyo.stop()
 
