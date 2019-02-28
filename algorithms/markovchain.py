@@ -106,7 +106,7 @@ class Markov_Chain:
                 else:
                     for chord in sequence[0:self.order]:
                         chunk.append(chord)
-                    chunks.append("".join(chunk))
+                    changes.append("".join(chunk))
 
         for c in changes:
             for t in range(len(self.transitions)):
