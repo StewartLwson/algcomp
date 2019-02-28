@@ -15,6 +15,8 @@ class Sound:
         # piano uses a pitched sample of a piano
         self.sound = sound
 
+        self.style = style
+
         # Lowest pitch value for every note
         self.notes_dict = { "c": 16.35, "c#": 17.32, "d": 18.35, "d#": 19.45,
         "e": 20.60, "f": 21.83, "f#": 23.12, "g": 24.50, "g#": 25.96,
@@ -51,7 +53,7 @@ class Sound:
         self.octave = octave
 
         # Chords according to given scale starting at given octave
-        self.chords = self.get_chords(self.octave, style)
+        self.chords = self.get_chords(self.octave, self.style)
 
         # Notes according to given scale starting at given octave
         self.notes = self.get_notes(self.scale, self.octave + 1)
@@ -68,10 +70,10 @@ class Sound:
         scale = []
         chord_list = []
         self.octave = octave
-        if style == "major_jazz":
+        if style == "minor_jazz":
             scale = self.scales_dict["minor"]
             chord_list = self.diatonic_dict["minor"]
-        elif style == "minor_jazz":
+        elif style == "major_jazz":
             scale = self.scales_dict["major"]
             chord_list = self.diatonic_dict["major"]
         elif style == "blues":
@@ -91,7 +93,8 @@ class Sound:
                 if style == "blues":
                     chords.append(SfPlayer("./sound/Piano.mf.C4.aiff", speed=[note, note * self.chord_dict["five"][1]]))
                 else:
-                    chords.append(SfPlayer("./sound/Piano.mf.C4.aiff", speed=[note, note * chord_list[c][1], note * chord_list[c][2], note * chord_list[c][3]]))
+                    current = chord_list[c]
+                    chords.append(SfPlayer("./sound/Piano.mf.C4.aiff", speed=[note, note * current[1], note * current[2], note * current[3]]))
         return chords
 
     def get_notes(self, scale, octave):
