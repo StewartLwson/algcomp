@@ -2,7 +2,7 @@ from algorithms.markovchain import Markov_Chain
 from algorithms.cellularautomata import Cellular_Automata
 from algorithms.geneticalgorithm import Genetic_Algorithm
 from util.io import IO
-from scales import *
+from util.scales import *
 
 class MusicGenerator():
 
@@ -21,7 +21,7 @@ class MusicGenerator():
         print("Melody: " + str(melody))
         comp = mc.generate_comp(length=3, start="1111")
         if saving == True:
-            self.io.save_song(melody, melody, comp)
+            self.io.save_song(melody, "blues", melody, comp)
         return melody, comp
 
 
@@ -30,11 +30,11 @@ class MusicGenerator():
         self.io.load_training_data("wjazz"), order=1, retrain=True)
         mc.train()
         ga = Genetic_Algorithm(scale=MAJOR_SCALE,
-                            style="jazz", population_size=100, npb=4, rule=30)
+                            style="jazz", population_size=10, npb=4, rule=30)
         melodies = ga.get_population()
         melody = melodies[0]
-        comp = mc.generate_comp(length=12, start="1")
+        comp = mc.generate_comp(length=24, start="1")
         if saving == True:
-            self.io.save_song(melody, melody, comp)
+            self.io.save_song(melody, "jazz", melody, comp)
         return melody, comp
 
