@@ -1,0 +1,137 @@
+{
+    "All of Me": {
+        "Chords": {
+            "A Section": [
+                ["C", "maj6", 4, 8],
+                ["E", "dom7", 4, 8],
+                ["A", "dom7", 4, 8],
+                ["D", "min7", 4, 8],
+                ["E", "dom7", 4, 8],
+                ["A", "min7", 4, 8],
+                ["D", "dom7", 4, 8],
+                ["D", "min7", 4, 4],
+                ["G", "dom7", 4, 4]
+            ],
+            "B Section": [
+                ["C", "maj6", 4, 8],
+                ["E", "dom7", 4, 8],
+                ["A", "dom7", 4, 8],
+                ["D", "min7", 4, 8],
+                ["E", "dom7", 4, 8],
+                ["F", "maj6", 4, 4],
+                ["F", "min6", 4, 4],
+                ["C", "maj7", 4, 2],
+                ["E", "halfdim7", 4, 2],
+                ["A", "dom7", 4, 4],
+                ["D", "min7", 4, 4],
+                ["G", "dom7", 4, 4],
+                ["C", "maj6", 4, 2],
+                ["E", "dim7", 4, 2],
+                ["D", "min7", 4, 2],
+                ["G", "dom7", 4, 2]
+            ]
+        },
+        "Time": "4/4",
+        "Key": "C maj",
+        "Title": "All of Me",
+        "Writer": "Seymour Simons/Gerald Marks",
+        "Style": "Med. Swing"
+    },
+    "Autumn Leaves": {
+        "Chords": {
+            "A Section": [
+                ["A", "min7", 4, 4],
+                ["D", "dom7", 4, 4],
+                ["G", "maj7", 4, 4],
+                ["C", "maj7", 4, 4],
+                ["F#", "halfdim7", 4, 4],
+                ["B", "dom7", 4, 4],
+                ["E", "min7", 4, 8],
+                ["A", "min7", 4, 4],
+                ["D", "dom7", 4, 4],
+                ["G", "maj7", 4, 4],
+                ["C", "maj7", 4, 4],
+                ["F#", "halfdim7", 4, 4],
+                ["B", "dom7", 4, 4],
+                ["E", "min7", 4, 8]
+            ],
+            "B Section": [
+                ["F#", "halfdim7", 4, 4],
+                ["B", "dom7", 4, 4],
+                ["E", "min7", 4, 8],
+                ["A", "min7", 4, 4],
+                ["D", "dom7", 4, 4],
+                ["G", "maj7", 4, 4],
+                ["C", "maj7", 4, 4],
+                ["F#", "halfdim7", 4, 4],
+                ["B", "dom7", 4, 4],
+                ["E", "min7", 4, 2],
+                ["A", "dom7", 4, 2],
+                ["D", "min7", 4, 2],
+                ["G", "dom7", 4, 2],
+                ["F", "halfdim7", 4, 4],
+                ["B", "dom7", 4, 4],
+                ["E", "min7", 4, 8]
+            ]
+        },
+        "Time": "4/4",
+        "Key": "G maj",
+        "Title": "Autumn Leaves",
+        "Writer": "Joseph Kosma/Johnny Mercer/Jacques Prevert",
+        "Style": "Med. Jazz"
+    },
+    "Take Five": {
+        "Chords": {
+            "A Section": [
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2]
+            ],
+            "B Section": [
+                ["Cb", "maj7", 4, 5],
+                ["Bb", "min7", 4, 5],
+                ["Ab", "min7", 4, 5],
+                ["Gb", "maj7", 4, 5],
+                ["Cb", "maj7", 4, 5],
+                ["Bb", "min7", 4, 5],
+                ["Ab", "min7", 4, 5],
+                ["F", "min7", 4, 3],
+                ["Bb", "min7", 4, 2]
+            ],
+            "Outro": [
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 3],
+                ["Bb", "min7", 4, 2],
+                ["Eb", "min", 4, 5]
+            ]
+        },
+        "Time": "5/4",
+        "Title": "Take Five",
+        "Writer": "Paul Desmond",
+        "Style": "Med."
+    }
+}

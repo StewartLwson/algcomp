@@ -59,9 +59,9 @@ class Markov_Chain:
 
         """
         states = []
-        for sequence in self.training_data:
-            chunks = [sequence[x:x+self.order] for x in range(0,
-            len(sequence), self.order)]
+        for chords in self.training_data:
+            chunks = [chords[x:x+self.order] for x in range(0,
+            len(chords), self.order)]
             for chunk in chunks:
                 chunk_string = "".join(chunk)
                 if chunk_string not in states:
@@ -80,7 +80,7 @@ class Markov_Chain:
         for row in self.states:
             t_row = []
             for column in self.states:
-                t_row.append(row + column)
+                t_row.append([row, column])
             transitions.append(t_row)
         return sorted(transitions)
 
@@ -97,16 +97,9 @@ class Markov_Chain:
         matrix = np.zeros([len(self.states), len(self.states)])
         changes = []
 
-        for sequence in self.training_data:
-            chunks = [sequence[x:x+self.order * 2] for x in range(0,
-            len(sequence), self.order)]
-            for chunk in chunks:
-                if len(chunk) == self.order * 2:
-                    changes.append("".join(chunk))
-                else:
-                    for chord in sequence[0:self.order]:
-                        chunk.append(chord)
-                    changes.append("".join(chunk))
+        for chords in self.training_data:
+            changes += [chords[x:x+self.order * 2] for x in range(0,
+            len(chords), self.order)]
 
         for c in changes:
             for t in range(len(self.transitions)):
@@ -167,30 +160,29 @@ class Markov_Chain:
         ----------
             length: int
                 The length of the composition based in terms of sequences.
-            start: int
+            start: str
                 The the starting state for the composition.
 
         """
-        if len(start) != self.order:
-            print("Starting sequence is not of order " + str(self.order))
-            return
-
+        # if len(start) != self.order:
+        #     print("Starting sequence is not of order " + str(self.order))
+        #     return
         current = start
         comp = []
-        for chord in current:
-            comp.append(chord)
-
+        comp.append(current)
         row = 0
 
         for _ in range(length - 1):
             for state in self.states:
                 if current == state:
                     row = self.states.index(state)
-            change = np.random.choice(self.transitions[row], replace=True,
+                    possible = []
+                    for transition in self.transitions[row]:
+                        possible.append(transition[1])
+            change = np.random.choice(possible, replace=True,
             p=self.matrix[row])
-            current = change[self.order:self.order * 2]
-            for chord in current:
-                comp.append(chord)
+            current = change
+            comp.append(current)
 
         print("Compositon of " + str(len(comp)) + " chords: " + str(comp))
         return comp

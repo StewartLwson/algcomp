@@ -1,0 +1,21 @@
+def create_chords(self):
+        print("'power' : {")
+        for _ in range(12):
+            chord = []
+            for i in [0, 7]:
+                chord.append(self.notes_list[i])
+            self.notes_list.append(self.notes_list.pop(0))
+            print("'" + str(chord[0]) + "'" + " : " + str(chord) + ",")
+        print("},")
+
+def set_mode(self, mode):
+        """
+        Re-orders the diatonic sequence according to the given mode.
+
+        mode: int
+            Order of the mode need to be set(ionian/major being 0,
+            aolian/minor being 5, etc)
+
+        """
+        for _ in range(mode):
+            self.diatonic_sequence.append(self.notes_list.pop(0))

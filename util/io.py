@@ -45,3 +45,8 @@ class IO:
         path = "./music/chords.json"
         data = self.load_json(path)
         return data
+
+    def load_scales(self):
+        path = "./music/scales.json"
+        data = self.load_json(path)
+        return data

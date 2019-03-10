@@ -25,10 +25,11 @@ class Sound:
         if not note_name == "-":
             path = self.sound_path + str(note_name) + str(note_octave) + ".aif"
             sound = SfPlayer(path)
-
-        sound.out()
-        time.sleep(dur)
-        sound.stop()
+            sound.out()
+            time.sleep(dur)
+            sound.stop()
+        else:
+            time.sleep(dur)
 
     def play_chord(self, chord, melody = []):
         """
@@ -85,15 +86,34 @@ class Sound:
     def play_both(self, melody, comp, bpm=60):
         """
         """
-        self.pyo.start()
-        self.bpm = bpm
-        melody_start = 0
+        if(self.check_sync(melody, comp)):
+            self.pyo.start()
+            self.bpm = bpm
+            melody_start = 0
+            for chord in comp:
+                chord_beats = chord[3]
+                melody_fragment = melody[melody_start:melody_start + chord_beats]
+                self.play_chord(chord, melody_fragment)
+                melody_start = melody_start + chord_beats
+            self.pyo.stop()
+        else:
+            print("Please check that the total number of beats for both parts are equal.")
+
+    def check_sync(self, melody, comp):
+        """
+        """
+        total_note_beats = 0
+        for note in melody:
+            note_beats = note[2]
+            total_note_beats += note_beats
+        total_chord_beats = 0
         for chord in comp:
-            chord_beats = chord[3] 
-            melody_fragment = melody[melody_start:melody_start + chord_beats]
-            self.play_chord(chord, melody_fragment)
-            melody_start = melody_start + chord_beats
-        self.pyo.stop()
+            chord_beats = chord[3]
+            total_chord_beats += chord_beats
+        print(total_note_beats)
+        print(total_chord_beats)
+        return total_note_beats == total_chord_beats
+
 
 
 

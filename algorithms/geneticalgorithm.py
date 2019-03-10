@@ -35,13 +35,13 @@ class Genetic_Algorithm:
 
     """
     def __init__(self, scale, style, generations = 5, population_size = 20,
-    best_sample = 8, lucky_few = 2, rule = 150, npb = 4, chance = 50):
+    best_sample = 8, lucky_few = 2, rule = 150, bars = 1, npb = 4, chance = 50):
         self.scale = scale
         self.style = style
         self.npb = npb
         self.rule = rule
         self.population_size = population_size
-        self.population = self.generate_first_population(self.npb, self.rule)
+        self.population = self.generate_first_population(scale, bars, npb, rule)
         self.best_sample = best_sample
         self.chance = chance
         self.lucky_few = lucky_few
@@ -57,7 +57,7 @@ class Genetic_Algorithm:
         """
         return self.population
 
-    def musical_fitness(self, melody):
+    def musical_fitness(self, scale, melody):
         """
         Returns a fitness score based on general music theory concepts. A
         higher score is given to sequences that start and end on root notes
@@ -73,14 +73,14 @@ class Genetic_Algorithm:
         score = 0
         for c, v in enumerate(melody):
             if c == 0: # on first note of the sequence
-                score += 1 if v == 0 else -1 # check if note is root
+                score += 1 if v == scale[0] else -1 # check if note is root
             if c == len(melody) - 1: # on last note of sequence
-                score += 1 if v == 0 else -1 # check if note is root
+                score += 1 if v == scale[0] else -1 # check if note is root
             if c % 2 == 0: # on strong beats
                 score += 1 if v != "-" else -1 # check if note is rest
         return score
 
-    def blues_fitness(self, melody):
+    def blues_fitness(self, scale, melody):
         """
         Returns a fitness score based on blues specific syntax. A higher score
         is given when the blues note is played correctly (inbetween the 4th
@@ -96,18 +96,18 @@ class Genetic_Algorithm:
         score = 0
         for c, v in enumerate(melody):
             if c == 0:
-                score += 1 if v != 6 else -1
+                score += 1 if v != scale[3] else -1
             if c == len(melody) - 1:
-                score += 1 if v != 6 else -1
-            if v == 6 and c < len(melody) - 1:
-                if melody[c + 1] == 5 or melody[c + 1] == 7 or \
-                melody[c - 1] == 5 or melody[c - 1] == 7:
+                score += 1 if v != scale[3] else -1
+            if v == scale[3] and c < len(melody) - 1:
+                if melody[c + 1] == scale[2] or melody[c + 1] == scale[4] or \
+                melody[c - 1] == scale[2] or melody[c - 1] == scale[4]:
                     score += 1
                 else:
                     score -= 1
         return score
 
-    def fitness(self, melody, style):
+    def fitness(self, scale, melody, style):
         """
         Returns a fitness for a given melody based score given by the
         fitness sub-functions. This total score is then normalized
@@ -124,9 +124,9 @@ class Genetic_Algorithm:
 
         """
         score = 0
-        score += self.musical_fitness(melody) * 100
+        score += self.musical_fitness(scale, melody) * 100
         if style == "blues":
-            score += self.blues_fitness(melody)
+            score += self.blues_fitness(scale, melody)
 
         normalized_score = 0
         if score > 0:
@@ -135,7 +135,7 @@ class Genetic_Algorithm:
             normalized_score = -1 - (1 / score)
         return normalized_score
 
-    def generate_first_population(self, npb, rule):
+    def generate_first_population(self, scale, bars, npb, rule):
         """
         Returns an initial population to be evolved by the Genetic Algorithm.
 
@@ -149,9 +149,9 @@ class Genetic_Algorithm:
 
         """
         population = []
-        ca = Cellular_Automata(scale=self.scale)
+        ca = Cellular_Automata()
         for _ in range(self.population_size):
-            melody = ca.generate_blues_melody()
+            melody = ca.generate_melody(scale, bars, npb)
             population.append(melody)
         return population
 
@@ -163,7 +163,7 @@ class Genetic_Algorithm:
         """
         sorted_population = {}
         for sequence in self.population:
-            sorted_population[str(sequence)] = self.fitness(melody = sequence, style = self.style)
+            sorted_population[str(sequence)] = self.fitness(scale = self.scale, melody = sequence, style = self.style)
         sorted_population = sorted(sorted_population.items(), key = operator.itemgetter(1), reverse = True)
         return sorted_population
 
@@ -181,7 +181,7 @@ class Genetic_Algorithm:
         sorted_population = {}
         next_gen = []
         for sequence in population:
-            sorted_population[str(sequence)] = self.fitness(melody = sequence, style = self.style)
+            sorted_population[str(sequence)] = self.fitness(scale = self.scale, melody = sequence, style = self.style)
         sorted_population = sorted(sorted_population.items(), key = operator.itemgetter(1), reverse = True)
         for i in range(self.best_sample):
             next_gen.append(sorted_population[i][0])
@@ -210,8 +210,8 @@ class Genetic_Algorithm:
         tournaments = [population[x:x+2] for x in range(0, len(population), 2)]
 
         for tournament in tournaments:
-            fitness1 = self.fitness(melody = tournament[0], style = self.style)
-            fitness2 = self.fitness(melody = tournament[1], style = self.style)
+            fitness1 = self.fitness(scale = self.scale, melody = tournament[0], style = self.style)
+            fitness2 = self.fitness(scale = self.scale, melody = tournament[1], style = self.style)
             best_score = max(fitness1, fitness2)
             if fitness1 == best_score:
                 winners.append(tournament[0])

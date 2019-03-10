@@ -2,12 +2,31 @@ from algorithms.markovchain import Markov_Chain
 from algorithms.cellularautomata import Cellular_Automata
 from algorithms.geneticalgorithm import Genetic_Algorithm
 from util.io import IO
-from util.scales import *
 
 class MusicGenerator():
 
     def __init__(self):
         self.io = IO()
+
+    def convert_notes(self, melody):
+        converted = []
+        for note in melody:
+            converted.append((note, 4, 1))
+        return converted
+
+    def convert_chords(self, comp):
+        converted = []
+        for chord in comp:
+            if not chord[1] == "#" or chord[1] == "b":
+                chord_name = chord[0]
+                chord_type = chord[1:]
+            else:
+                chord_name = chord[0:1]
+                chord_type = chord[2:]
+            chord_octave = 4
+            chord_length = 4
+            converted.append((chord_name, chord_type, chord_octave, chord_length))
+        return converted
 
     def twelve_bar_blues(self, saving):
         training_data = self.io.load_training_data("12bblues")
@@ -23,7 +42,6 @@ class MusicGenerator():
         if saving == True:
             self.io.save_song(melody, "blues", melody, comp)
         return melody, comp
-
 
     def jazz(self, saving):
         mc = Markov_Chain(training_data=
