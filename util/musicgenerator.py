@@ -1,4 +1,5 @@
 from algorithms.markovchain import Markov_Chain
+from algorithms.hiddenmarkovmodel import HMM
 from algorithms.cellularautomata import Cellular_Automata
 from algorithms.geneticalgorithm import Genetic_Algorithm
 from util.io import IO
@@ -40,14 +41,21 @@ class MusicGenerator():
 
     def generate_jazz(self, start = "", saving = False):
         training_data = self.parse_standards(self.io.load_training_data("standards"))
-        mc = Markov_Chain(training_data=training_data, order=1, retrain=True)
-        mc.train()
+        #mc = Markov_Chain(training_data=training_data, order=1, retrain=True)
+        #mc.train()
+        chords = self.io.load_chords()
         ga = Genetic_Algorithm(scale=self.scale, bars = 32, style="jazz", population_size=10, npb=4, rule=30)
         melodies = ga.get_population()
         melody = melodies[0]
-        comp = mc.generate_comp(length=32, start=start)
+        hmm = HMM(training_chords=training_data, training_melody=melody, order = 1, retrain=True, chords=chords)
+        comp = hmm.generate_comp(length=32, start=start)
         if saving == True:
-            self.io.save_song(melody, "jazz", melody, comp)
+            info = "Markov Chain -" + \
+                   " Order: " + str(hmm.order) + \
+                   " Genetic Algorithm -" \
+                   " Population Size: " + str(ga.population_size) + \
+                   " Generations: " + str(ga.generations)
+            self.io.save_song(melody, "jazz", melody, comp, info)
         return melody, comp
 
     def generate_jazz_comp(self, start = ""):

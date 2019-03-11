@@ -32,12 +32,13 @@ class IO:
         data = self.load_json(path)
         return data["melody"], data["comp"]
 
-    def save_song(self, filename, style, melody, comp):
+    def save_song(self, filename, style, melody, comp, info):
         filename = str(hashlib.sha1(str(filename).encode("utf-8")).hexdigest())
         path = "./songs/" + style + "/" + filename + ".json"
         data = {
             "melody": melody,
             "comp": comp,
+            "info": info
         }
         self.save_json(path, data)
 

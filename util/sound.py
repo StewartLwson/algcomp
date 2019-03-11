@@ -28,12 +28,13 @@ class Sound:
         """
         converted = []
         for chord in comp:
-            if not chord[1] == "#" or chord[1] == "b":
+            if chord[1] == "#" or chord[1] == "b":
+                chord_name = chord[0:2]
+                chord_type = chord[2:]
+            else:
                 chord_name = chord[0]
                 chord_type = chord[1:]
-            else:
-                chord_name = chord[0:1]
-                chord_type = chord[2:]
+
             chord_octave = 4
             chord_length = 4
             converted.append((chord_name, chord_type, chord_octave, chord_length))

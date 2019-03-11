@@ -173,7 +173,7 @@ class Markov_Chain:
         self.transitions = data["transitions"]
         self.matrix = data["matrix"]
 
-    def generate_comp(self, length, start = ""):
+    def generate_comp(self, length, start = "", matrix = []):
         """
         Generates compositions based on training by appending states to the
         overall composition for a desired length.
@@ -189,11 +189,12 @@ class Markov_Chain:
         # if len(start) != self.order:
         #     print("Starting sequence is not of order " + str(self.order))
         #     return
+        if matrix == []:
+            matrix == self.matrix
         if start == "":
             current = np.random.choice(self.starting_states, replace=True, p=self.starting_probabilities)
         else:
             current = start
-        print(current)
         comp = []
         comp.append(current)
         row = 0
@@ -206,7 +207,7 @@ class Markov_Chain:
                     for transition in self.transitions[row]:
                         possible.append(transition[1])
             change = np.random.choice(possible, replace=True,
-            p=self.matrix[row])
+            p=matrix[row])
             current = change
             comp.append(current)
 

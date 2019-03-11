@@ -103,8 +103,8 @@ class Cellular_Automata:
         melody = []
         for _ in range(bars):
             section = self.generate_target_sequence(scale, bars = 1, npb = npb)
-            rhythm = self.generate_rhythm(bars = 1, npb = npb)
-            section = self.apply_rhythm(section, rhythm)
+            #rhythm = self.generate_rhythm(bars = 1, npb = npb)
+            #section = self.apply_rhythm(section, rhythm)
             melody += section
         return melody
 

@@ -41,6 +41,7 @@ class Genetic_Algorithm:
         self.npb = npb
         self.rule = rule
         self.population_size = population_size
+        self.generations = generations
         self.population = self.generate_first_population(scale, bars, npb, rule)
         self.best_sample = best_sample
         self.chance = chance
