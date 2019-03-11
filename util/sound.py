@@ -15,6 +15,30 @@ class Sound:
         self.sound_path = "./sound/piano-mf-"
         self.bpm = 60
 
+    def convert_notes(self, melody):
+        """
+        """
+        converted = []
+        for note in melody:
+            converted.append((note, 5, 1))
+        return converted
+
+    def convert_chords(self, comp):
+        """
+        """
+        converted = []
+        for chord in comp:
+            if not chord[1] == "#" or chord[1] == "b":
+                chord_name = chord[0]
+                chord_type = chord[1:]
+            else:
+                chord_name = chord[0:1]
+                chord_type = chord[2:]
+            chord_octave = 4
+            chord_length = 4
+            converted.append((chord_name, chord_type, chord_octave, chord_length))
+        return converted
+
     def play_note(self, note):
         """
         """
@@ -45,7 +69,6 @@ class Sound:
 
         if not chord_name == "-":
             for note in chord_notes:
-                path = self.sound_path + str(note) + str(chord_octave + 1) + ".aif"
                 path = self.sound_path + str(note) + str(chord_octave) + ".aif"
                 sounds.append(SfPlayer(path))
 
@@ -67,6 +90,7 @@ class Sound:
         """
         self.pyo.start()
         self.bpm = bpm
+        comp = self.convert_chords(comp)
         for chord in comp:
             self.play_chord(chord)
         self.pyo.stop()
@@ -76,6 +100,7 @@ class Sound:
         """
         self.pyo.start()
         beat = 60/bpm
+        melody = self.convert_notes(melody)
         for note in melody:
             if note == "-":
                 time.sleep(beat)
@@ -86,6 +111,8 @@ class Sound:
     def play_both(self, melody, comp, bpm=60):
         """
         """
+        melody = self.convert_notes(melody)
+        comp = self.convert_chords(comp)
         if(self.check_sync(melody, comp)):
             self.pyo.start()
             self.bpm = bpm
@@ -93,6 +120,8 @@ class Sound:
             for chord in comp:
                 chord_beats = chord[3]
                 melody_fragment = melody[melody_start:melody_start + chord_beats]
+                print(chord)
+                print(melody_fragment)
                 self.play_chord(chord, melody_fragment)
                 melody_start = melody_start + chord_beats
             self.pyo.stop()
