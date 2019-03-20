@@ -15,38 +15,12 @@ class Sound:
         self.sound_path = "./sound/piano-mf-"
         self.bpm = 60
 
-    def convert_notes(self, melody):
-        """
-        """
-        converted = []
-        for note in melody:
-            converted.append((note, 5, 1))
-        return converted
-
-    def convert_chords(self, comp):
-        """
-        """
-        converted = []
-        for chord in comp:
-            if chord[1] == "#" or chord[1] == "b":
-                chord_name = chord[0:2]
-                chord_type = chord[2:]
-            else:
-                chord_name = chord[0]
-                chord_type = chord[1:]
-
-            chord_octave = 4
-            chord_length = 4
-            converted.append((chord_name, chord_type, chord_octave, chord_length))
-        return converted
-
-    def play_note(self, note):
+    def play_note(self, note, dur):
         """
         """
         note_name = note[0]
         note_octave = note[1]
         note_beats = note[2]
-        dur = (60 * note_beats) / self.bpm
         if not note_name == "-":
             path = self.sound_path + str(note_name) + str(note_octave) + ".aif"
             sound = SfPlayer(path)
@@ -64,7 +38,7 @@ class Sound:
         chord_notes = self.chords[chord_type][chord_name]
         chord_octave = chord[2]
         chord_beats = chord[3]
-        dur = (60 * chord_beats) / self.bpm
+        dur = 60 / self.bpm
 
         sounds = []
 
@@ -78,7 +52,7 @@ class Sound:
 
         if not len(melody) == 0:
             for note in melody:
-                self.play_note(note)
+                self.play_note(note, dur * (4/chord_beats))
         else:
             time.sleep(dur)
 
@@ -91,7 +65,6 @@ class Sound:
         """
         self.pyo.start()
         self.bpm = bpm
-        comp = self.convert_chords(comp)
         for chord in comp:
             self.play_chord(chord)
         self.pyo.stop()
@@ -101,10 +74,10 @@ class Sound:
         """
         self.pyo.start()
         beat = 60/bpm
-        melody = self.convert_notes(melody)
         for note in melody:
+            print(note)
             if note == "-":
-                time.sleep(beat)
+                time.sleep(beat )
             else:
                 self.play_note(note)
         self.pyo.stop()
@@ -112,8 +85,6 @@ class Sound:
     def play_both(self, melody, comp, bpm=60):
         """
         """
-        melody = self.convert_notes(melody)
-        comp = self.convert_chords(comp)
         if(self.check_sync(melody, comp)):
             self.pyo.start()
             self.bpm = bpm

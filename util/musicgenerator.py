@@ -24,44 +24,77 @@ class MusicGenerator():
                     training_data.append(song)
         return training_data
 
-    def twelve_bar_blues(self, saving):
-        training_data = self.io.load_training_data("12bblues")
-        print(training_data)
-        mc = Markov_Chain(training_data=training_data, order=4, retrain=True)
-        mc.train()
-        ga = Genetic_Algorithm(scale=MINOR_BLUES,
-                            style="blues", population_size=5, npb=4, rule=30)
-        melodies = ga.get_population()
-        melody = melodies[0]
-        print("Melody: " + str(melody))
-        comp = mc.generate_comp(length=3, start="1111")
-        if saving == True:
-            self.io.save_song(melody, "blues", melody, comp)
-        return melody, comp
+    def convert_notes(self, melody):
+        """
+        """
+        converted = []
+        for note in melody:
+            converted.append((note, 5, 1))
+        return converted
 
-    def generate_jazz(self, start = "", saving = False):
-        training_data = self.parse_standards(self.io.load_training_data("standards"))
-        #mc = Markov_Chain(training_data=training_data, order=1, retrain=True)
-        #mc.train()
+    def convert_chords(self, comp, npb = 4):
+        """
+        """
+        converted = []
+        for chord in comp:
+            if chord[1] == "#" or chord[1] == "b":
+                chord_name = chord[0:2]
+                chord_type = chord[2:]
+            else:
+                chord_name = chord[0]
+                chord_type = chord[1:]
+
+            chord_octave = 4
+            chord_length = npb
+            converted.append((chord_name, chord_type, chord_octave, chord_length))
+        return converted
+
+    def generate_jazz(self, start = "", saving = False, comp_method = "HMM",
+                      order=1, retrain=True, npb=4, population_size=10):
+        training_data = self.parse_standards(
+                        self.io.load_training_data("standards"))
         chords = self.io.load_chords()
-        ga = Genetic_Algorithm(scale=self.scale, bars = 32, style="jazz", population_size=10, npb=4, rule=30)
+        ga = Genetic_Algorithm(scale=self.scale, bars = 32, style="jazz",
+        population_size=population_size, npb=npb, rule=30)
         melodies = ga.get_population()
         melody = melodies[0]
-        hmm = HMM(training_chords=training_data, training_melody=melody, order = 1, retrain=True, chords=chords)
-        comp = hmm.generate_comp(length=32, start=start)
+        if comp_method == "HMM":
+            hmm = HMM(training_chords=training_data, training_melody=melody,
+            order=order, retrain=retrain, chords=chords)
+            comp = hmm.generate_comp(length=32, start=start)
+        else:
+            mc = Markov_Chain(training_data=training_data, order=order, retrain=retrain)
+            mc.train()
+            comp = mc.generate_comp(length=32, start=start)
+        melody = self.convert_notes(melody)
+        comp = self.convert_chords(comp, npb = npb)
         if saving == True:
-            info = "Markov Chain -" + \
-                   " Order: " + str(hmm.order) + \
+            info = comp_method + \
+                   " Order: " + str(order) + \
                    " Genetic Algorithm -" \
                    " Population Size: " + str(ga.population_size) + \
                    " Generations: " + str(ga.generations)
             self.io.save_song(melody, "jazz", melody, comp, info)
         return melody, comp
 
-    def generate_jazz_comp(self, start = ""):
-        training_data = self.parse_standards(self.io.load_training_data("standards"))
-        mc = Markov_Chain(training_data=training_data, order=1, retrain=True)
-        mc.train()
-        comp = mc.generate_comp(length=32, start=start)
+    def generate_jazz_comp(self, start = "", saving = False, comp_method = "HMM",
+                      order=1, retrain=True, npb=4, melody = []):
+        training_data = self.parse_standards(
+                        self.io.load_training_data("standards"))
+        chords = self.io.load_chords()
+        if comp_method == "HMM":
+            hmm = HMM(training_chords=training_data, training_melody=melody,
+            order=order, retrain=retrain, chords=chords)
+            comp = hmm.generate_comp(length=32, start=start)
+            melody = self.convert_notes(melody)
+        else:
+            mc = Markov_Chain(training_data=training_data, order=order, retrain=retrain)
+            mc.train()
+            comp = mc.generate_comp(length=32, start=start)
+        comp = self.convert_chords(comp, npb = npb)
+        if saving == True:
+            info = comp_method + \
+                   " Order: " + str(order) + \
+            self.io.save_song(melody, "jazz", melody, comp, info)
         return comp
 
