@@ -90,6 +90,8 @@ class Sound:
             self.bpm = bpm
             melody_start = 0
             for chord in comp:
+                drums = SfPlayer("sound/drums2.wav", speed = bpm/120)
+                drums.out()
                 chord_beats = chord[3]
                 melody_fragment = melody[melody_start:melody_start + chord_beats]
                 print(chord)
