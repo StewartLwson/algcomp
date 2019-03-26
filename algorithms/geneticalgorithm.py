@@ -299,7 +299,7 @@ class Genetic_Algorithm:
                 The chance that the mutation will occur.
 
         """
-        index = np.random.randint(0, 11)
+        index = np.random.randint(0, len(individual))
         if np.random.randint(0, 100) < chance:
             individual[index] = np.random.choice(self.scale)
         return individual

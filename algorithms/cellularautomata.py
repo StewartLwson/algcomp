@@ -65,17 +65,20 @@ class Cellular_Automata:
         return sequence
 
     def generate_rhythm(self, bars = 1, npb = 4):
-        sequence = []
+        sequences = []
         self.rule = np.random.randint(0, 255)
         self.generate_starting_state()
         self.evolve()
         rest = ["-", 0]
-        for generation in self.grid:
-            index = int(sum(generation) % 2)
-            sequence.append(rest[index])
-            if len(sequence) >= npb:
-                break
-        return sequence
+        for _ in range(bars):
+            sequence = []
+            for generation in self.grid:
+                index = int(sum(generation) % 2)
+                sequence.append(rest[index])
+                if len(sequence) >= npb:
+                    break
+            sequences.append(sequence)
+        return sequences
 
     def generate_target_sequence(self, scale, bars = 1, npb = 4):
         target_notes = self.generate_notes(scale, bars = 1, npb = 2)
@@ -101,9 +104,10 @@ class Cellular_Automata:
 
     def generate_melody(self, scale, bars = 1, npb = 4):
         melody = []
+        rhythms = self.generate_rhythm(bars = 4, npb = npb)
         for _ in range(bars):
             section = self.generate_target_sequence(scale, bars = 1, npb = npb)
-            rhythm = self.generate_rhythm(bars = 1, npb = npb)
+            rhythm = rhythms[np.random.choice(range(len(rhythms)))]
             section = self.apply_rhythm(section, rhythm)
             melody += section
         return melody

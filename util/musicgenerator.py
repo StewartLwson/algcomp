@@ -50,12 +50,16 @@ class MusicGenerator():
         return converted
 
     def generate_jazz(self, start = "", saving = False, comp_method = "HMM",
-                      order=1, retrain=True, npb=4, population_size=10):
+                      order=1, retrain=True, npb=4, population=10,
+                      generations =5):
+        """
+        """
         training_data = self.parse_standards(
                         self.io.load_training_data("standards"))
         chords = self.io.load_chords()
         ga = Genetic_Algorithm(scale=self.scale, bars = 32, style="jazz",
-        population_size=population_size, npb=npb, rule=30)
+        population_size=population, generations = generations, npb=npb,
+        rule=30)
         melodies = ga.get_population()
         melody = melodies[0]
         if comp_method == "HMM":
