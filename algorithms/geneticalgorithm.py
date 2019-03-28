@@ -56,7 +56,10 @@ class Genetic_Algorithm:
         Returns the current population.
 
         """
-        return self.population
+        fitnesses = []
+        for individual in self.population:
+            fitnesses.append(self.fitness(scale = self.scale, melody = individual, style = self.style))
+        return self.population, fitnesses
 
     def musical_fitness(self, scale, melody):
         """
