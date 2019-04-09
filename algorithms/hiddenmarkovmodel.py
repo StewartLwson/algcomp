@@ -58,7 +58,6 @@ class HMM():
             num = sum(row)
             for i, col in enumerate(row):
                 row[i] = col / num
-        print(matrix)
         return matrix
 
     def generate_comp(self, length, start = ""):

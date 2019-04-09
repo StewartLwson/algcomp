@@ -9,18 +9,39 @@ class MusicGenerator():
     def __init__(self):
         self.io = IO()
         self.scales = self.io.load_scales()
-        self.scale = self.scales["major"]["C"]
+
+    def parse_blues(self, blues, key):
+        training_data = []
+        for _, details in blues.items():
+            for detail, values in details.items():
+                song = []
+                if detail == key:
+                    for value in values:
+                        song.append(value[0] + value[1])
+                    training_data.append(song)
+        return training_data
 
     def parse_standards(self, standards):
         training_data = []
-        for standard, details in standards.items():
+        for _, details in standards.items():
             for detail, values in details.items():
                 song = []
                 if detail == "Chords":
-                    for value in values["A Section"]:
-                        song.append(value[0] + value[1])
-                    for value in values["B Section"]:
-                        song.append(value[0] + value[1])
+                    if "A Section" in values.keys():
+                        for value in values["A Section"]:
+                            song.append(value[0] + value[1])
+                    if "B Section" in values.keys():
+                        for value in values["B Section"]:
+                            song.append(value[0] + value[1])
+                    if "C Section" in values.keys():
+                        for value in values["C Section"]:
+                            song.append(value[0] + value[1])
+                    if "Intro" in values.keys():
+                        for value in values["Intro"]:
+                            song.append(value[0] + value[1])
+                    if "Head" in values.keys():
+                        for value in values["Head"]:
+                            song.append(value[0] + value[1])
                     training_data.append(song)
         return training_data
 
@@ -49,19 +70,64 @@ class MusicGenerator():
             converted.append((chord_name, chord_type, chord_octave, chord_length))
         return converted
 
-    def generate_jazz(self, start = "", saving = False, comp_method = "HMM",
-                      order=1, retrain=True, npb=4, population=10,
-                      generations =5):
+    def generate_blues(self, saving=True, order=1, retrain=True,
+                       npb=8, key="C", population=10, generations=5):
+        """
+        """
+        training_data = self.parse_blues(
+                        self.io.load_training_data("12bblues"), key)
+        mc = Markov_Chain(training_data=training_data,
+                          order=order,
+                          retrain=retrain)
+        mc.train()
+        scale = self.scales["minor blues"][key]
+        ga = Genetic_Algorithm(scale=scale,
+                                 bars=12,
+                                 style="blues",
+                                 population_size=population,
+                                 generations=generations,
+                                 npb=npb,
+                                 rule=30)
+        melodies, fitnesses = ga.get_population()
+        melody = melodies[0]
+        fitness = fitnesses[0]
+        print("Fitness of melody: " + str(fitnesses[0]))
+        melody = self.convert_notes(melody)
+        comp = mc.generate_comp(length=12)
+        comp = self.convert_chords(comp,
+                                   npb = npb)
+        if saving == True:
+            info = "MC" + \
+                   " Order: " + str(order) + \
+                   " Genetic Algorithm -" \
+                   " Population Size: " + str(ga.population_size) + \
+                   " Generations: " + str(ga.generations) + \
+                   " Fitness: " + str(fitness)
+            self.io.save_song(melody, "blues", melody, comp, info)
+        return melody, comp
+
+
+    def generate_jazz(self, start="", saving=True, comp_method="HMM",
+                      order=1, retrain=True, npb=8, key="C", population=10,
+                      generations=5):
         """
         """
         training_data = self.parse_standards(
                         self.io.load_training_data("standards"))
         chords = self.io.load_chords()
-        ga = Genetic_Algorithm(scale=self.scale, bars = 32, style="jazz",
-        population_size=population, generations = generations, npb=npb,
-        rule=30)
-        melodies = ga.get_population()
+        scale = self.scales["major"][key]
+        ga = Genetic_Algorithm(scale=scale,
+                               bars = 32,
+                               style="jazz",
+                               population_size=population,
+                               generations = generations,
+                               npb=npb,
+                               rule=30)
+        melodies, fitnesses = ga.get_population()
         melody = melodies[0]
+        print(len(melody))
+        fitness = fitnesses[0]
+        print("Fitness of melody: " + str(fitness))
         if comp_method == "HMM":
             hmm = HMM(training_chords=training_data, training_melody=melody,
             order=order, retrain=retrain, chords=chords)
@@ -77,7 +143,8 @@ class MusicGenerator():
                    " Order: " + str(order) + \
                    " Genetic Algorithm -" \
                    " Population Size: " + str(ga.population_size) + \
-                   " Generations: " + str(ga.generations)
+                   " Generations: " + str(ga.generations) + \
+                   " Fitness: " + str(fitness)
             self.io.save_song(melody, "jazz", melody, comp, info)
         return melody, comp
 

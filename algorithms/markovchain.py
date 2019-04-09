@@ -186,11 +186,8 @@ class Markov_Chain:
                 The the starting state for the composition.
 
         """
-        # if len(start) != self.order:
-        #     print("Starting sequence is not of order " + str(self.order))
-        #     return
         if matrix == []:
-            matrix == self.matrix
+            matrix = self.matrix
         if start == "":
             current = np.random.choice(self.starting_states, replace=True, p=self.starting_probabilities)
         else:
