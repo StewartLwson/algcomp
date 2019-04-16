@@ -2,6 +2,7 @@
 
 from algorithms.cellularautomata import Cellular_Automata
 import numpy as np
+import statistics
 import operator
 
 class Genetic_Algorithm:
@@ -46,10 +47,13 @@ class Genetic_Algorithm:
         self.best_sample = best_sample
         self.chance = chance
         self.lucky_few = lucky_few
-        for _ in range(generations):
+        for i in range(generations):
+            print("Evolving Generation " + str(i + 1))
             self.parents = self.tournament_selection(self.population)
             self.population = self.multipoint_crossover(self.parents)
-        self.sort_population()
+            stats = self.get_population_stats()
+            print("Most Fit:" + str(stats[0]) + ", Median:" + str(stats[1]) + ", Least Fit:" + str(stats[2]))
+        self.population = self.sort_population()
 
     def get_population(self):
         """
@@ -128,16 +132,11 @@ class Genetic_Algorithm:
 
         """
         score = 0
-        score += self.musical_fitness(scale, melody) * 100
+        score += self.musical_fitness(scale, melody)
         if style == "blues":
             score += self.blues_fitness(scale, melody)
 
-        normalized_score = 0
-        if score > 0:
-            normalized_score = 1 - (1 / score)
-        elif score < 0:
-            normalized_score = -1 - (1 / score)
-        return normalized_score
+        return score
 
     def generate_first_population(self, scale, bars, npb, rule):
         """
@@ -154,10 +153,18 @@ class Genetic_Algorithm:
         """
         population = []
         ca = Cellular_Automata()
-        for _ in range(self.population_size):
+        for i in range(self.population_size):
+            print("Generating Initial Population: " + str(i + 1) + "/" + str(self.population_size))
             melody = ca.generate_melody(scale, bars, npb)
             population.append(melody)
         return population
+
+    def get_individual_fitness_pairs(self):
+        individual_fitness_pairs = []
+        for sequence in self.population:
+            fitness = self.fitness(scale = self.scale, melody = sequence, style = self.style)
+            individual_fitness_pairs.append((sequence, fitness))
+        return individual_fitness_pairs
 
     def sort_population(self):
         """
@@ -165,11 +172,22 @@ class Genetic_Algorithm:
         fitness.
 
         """
-        sorted_population = {}
-        for sequence in self.population:
-            sorted_population[str(sequence)] = self.fitness(scale = self.scale, melody = sequence, style = self.style)
-        sorted_population = sorted(sorted_population.items(), key = operator.itemgetter(1), reverse = True)
+        individual_fitness_pairs = self.get_individual_fitness_pairs()
+        sorted_population = []
+        def sortSecond(val):
+            return val[1]
+        individual_fitness_pairs.sort(key = sortSecond)
+        for pair in individual_fitness_pairs:
+            sorted_population.append(pair[0])
         return sorted_population
+
+    def get_population_stats(self):
+        individual_fitness_pairs = self.get_individual_fitness_pairs()
+        fitnesses = []
+        for pair in individual_fitness_pairs:
+            fitnesses.append(pair[1])
+        return max(fitnesses), statistics.median(fitnesses), min(fitnesses)
+
 
     def best_selection(self, population):
         """
