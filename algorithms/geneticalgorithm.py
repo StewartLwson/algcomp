@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from algorithms.cellularautomata import Cellular_Automata
+from algorithms.randomstring import Random_String
 import numpy as np
 import statistics
 import operator
@@ -36,13 +37,14 @@ class Genetic_Algorithm:
 
     """
     def __init__(self, scale, style, generations = 5, population_size = 20,
-    best_sample = 8, lucky_few = 2, rule = 150, bars = 1, npb = 4, chance = 50):
+    best_sample = 8, lucky_few = 2, rule = 150, bars = 1, npb = 4, chance = 50, melody_method="CA"):
         self.scale = scale
         self.style = style
         self.npb = npb
         self.rule = rule
         self.population_size = population_size
         self.generations = generations
+        self.melody_method = melody_method
         self.population = self.generate_first_population(scale, bars, npb, rule)
         self.best_sample = best_sample
         self.chance = chance
@@ -152,10 +154,14 @@ class Genetic_Algorithm:
 
         """
         population = []
-        ca = Cellular_Automata()
         for i in range(self.population_size):
             print("Generating Initial Population: " + str(i + 1) + "/" + str(self.population_size))
-            melody = ca.generate_melody(scale, bars, npb)
+            if self.melody_method == "CA":
+                ca = Cellular_Automata()
+                melody = ca.generate_melody(scale, bars, npb)
+            elif self.melody_method == "RS":
+                rs = Random_String()
+                melody = rs.generate_melody(scale = scale, bars = bars, npb = npb)
             population.append(melody)
         return population
 
@@ -302,12 +308,12 @@ class Genetic_Algorithm:
                 else:
                     child1 = child1 + couple[1][x:x+self.npb]
                     child2 = child2 + couple[0][x:x+self.npb]
-            children.append(child1)
-            children.append(child2)
+            children.append(self.mutate(child1))
+            children.append(self.mutate(child2))
         children.append(leftover)
         return children
 
-    def mutate(self, individual, chance):
+    def mutate(self, individual):
         """
         Returns an individual that may have had a random note replaced
         depending on a given chance.
@@ -321,7 +327,7 @@ class Genetic_Algorithm:
 
         """
         index = np.random.randint(0, len(individual))
-        if np.random.randint(0, 100) < chance:
+        if np.random.randint(0, 100) < self.chance:
             individual[index] = np.random.choice(self.scale)
         return individual
 
