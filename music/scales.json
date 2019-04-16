@@ -74,5 +74,24 @@
         "A#": ["bb", "db", "eb", "e", "f", "ab"],
         "Bb": ["bb", "db", "eb", "e", "f", "ab"],
         "B": ["b", "d", "e", "f", "gb", "a"]
+    },
+    "chromatic": {
+        "C": ["c", "db", "d", "eb", "e", "f", "gb", "g", "ab", "a", "bb", "b"],
+        "C#": ["db", "d", "eb", "e", "f", "gb", "g", "ab", "a", "bb", "b", "c"],
+        "Db": ["db", "d", "eb", "e", "f", "gb", "g", "ab", "a", "bb", "b", "c"],
+        "D": ["d", "eb", "e", "f", "gb", "g", "ab", "a", "bb", "b", "c", "db"],
+        "D#": ["eb", "e", "f", "gb", "g", "ab", "a", "bb", "b", "c", "db", "d"],
+        "Eb": ["eb", "e", "f", "gb", "g", "ab", "a", "bb", "b", "c", "db", "d"],
+        "E": ["e", "f", "gb", "g", "ab", "a", "bb", "b", "c", "db", "d", "eb"],
+        "F": ["f", "gb", "g", "ab", "a", "bb", "b", "c", "db", "d", "eb", "e"],
+        "F#": ["gb", "g", "ab", "a", "bb", "b", "c", "db", "d", "eb", "e", "f"],
+        "Gb": ["gb", "g", "ab", "a", "bb", "b", "c", "db", "d", "eb", "e", "f"],
+        "G": ["g", "ab", "a", "bb", "b", "c", "db", "d", "eb", "e", "f", "gb"],
+        "G#": ["ab", "a", "bb", "b", "c", "db", "d", "eb", "e", "f", "gb", "g"],
+        "Ab": ["ab", "a", "bb", "b", "c", "db", "d", "eb", "e", "f", "gb", "g"],
+        "A": ["a", "bb", "b", "c", "db", "d", "eb", "e", "f", "gb", "g", "ab"],
+        "A#": ["bb", "b", "c", "db", "d", "eb", "e", "f", "gb", "g", "ab", "a"],
+        "Bb": ["bb", "b", "c", "db", "d", "eb", "e", "f", "gb", "g", "ab", "a"],
+        "B": ["b", "c", "db", "d", "eb", "e", "f", "gb", "g", "ab", "a", "bb"]
     }
 }
