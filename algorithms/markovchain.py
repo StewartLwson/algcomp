@@ -207,6 +207,4 @@ class Markov_Chain:
             p=matrix[row])
             current = change
             comp.append(current)
-
-        print("Compositon of " + str(len(comp)) + " chords: " + str(comp))
         return comp

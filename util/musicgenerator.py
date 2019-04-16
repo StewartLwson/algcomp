@@ -108,10 +108,12 @@ class MusicGenerator():
 
 
     def generate_jazz(self, folder, start="", saving=True, comp_method="HMM",
-                      order=1, retrain=True, npb=8, key="C", population=10,
-                      generations=5, filename = ""):
+                      melody_method="CA", order=1, retrain=True, npb=8, key="C", population=10,
+                      generations=5, filename = "", amount = 100):
         """
         """
+        if amount > population:
+            amount = population
         training_data = self.parse_standards(
                         self.io.load_training_data("standards"))
         chords = self.io.load_chords()
@@ -120,19 +122,18 @@ class MusicGenerator():
                                bars = 32,
                                style="jazz",
                                population_size=population,
-                               generations = generations,
+                               generations=generations,
                                npb=npb,
-                               rule=30)
+                               rule=30,
+                               melody_method=melody_method)
         melodies, fitnesses = ga.get_population()
-        melody = melodies[0]
-        fitness = fitnesses[0]
-        print("Fitness of melody: " + str(fitness))
-        for i, _ in enumerate(melodies):
+        for i in range(amount):
             melody = melodies[i]
             fitness = fitnesses[i]
             if comp_method == "HMM":
                 hmm = HMM(training_chords=training_data, training_melody=melody,
                 order=order, retrain=retrain, chords=chords)
+                print("Generation Comp for Melody " + str(i + 1))
                 comp = hmm.generate_comp(length=32, start=start)
             else:
                 mc = Markov_Chain(training_data=training_data, order=order, retrain=retrain)
@@ -147,7 +148,7 @@ class MusicGenerator():
                     " Population Size: " + str(ga.population_size) + \
                     " Generations: " + str(ga.generations) + \
                     " Fitness: " + str(fitness)
-                self.io.save_song("jazz", melody, comp, info, filename= filename + str(i + 1))
+                self.io.save_song(folder, melody, comp, info, filename= filename + str(i + 1))
         return melody, comp
 
     def generate_jazz_comp(self, start = "", saving = False, comp_method = "HMM",
