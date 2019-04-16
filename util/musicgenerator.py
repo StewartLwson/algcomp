@@ -103,13 +103,13 @@ class MusicGenerator():
                    " Population Size: " + str(ga.population_size) + \
                    " Generations: " + str(ga.generations) + \
                    " Fitness: " + str(fitness)
-            self.io.save_song(melody, "blues", melody, comp, info)
+            self.io.save_song("blues", melody, comp, info,)
         return melody, comp
 
 
-    def generate_jazz(self, start="", saving=True, comp_method="HMM",
+    def generate_jazz(self, folder, start="", saving=True, comp_method="HMM",
                       order=1, retrain=True, npb=8, key="C", population=10,
-                      generations=5):
+                      generations=5, filename = ""):
         """
         """
         training_data = self.parse_standards(
@@ -125,27 +125,29 @@ class MusicGenerator():
                                rule=30)
         melodies, fitnesses = ga.get_population()
         melody = melodies[0]
-        print(len(melody))
         fitness = fitnesses[0]
         print("Fitness of melody: " + str(fitness))
-        if comp_method == "HMM":
-            hmm = HMM(training_chords=training_data, training_melody=melody,
-            order=order, retrain=retrain, chords=chords)
-            comp = hmm.generate_comp(length=32, start=start)
-        else:
-            mc = Markov_Chain(training_data=training_data, order=order, retrain=retrain)
-            mc.train()
-            comp = mc.generate_comp(length=32, start=start)
-        melody = self.convert_notes(melody)
-        comp = self.convert_chords(comp, npb = npb)
-        if saving == True:
-            info = comp_method + \
-                   " Order: " + str(order) + \
-                   " Genetic Algorithm -" \
-                   " Population Size: " + str(ga.population_size) + \
-                   " Generations: " + str(ga.generations) + \
-                   " Fitness: " + str(fitness)
-            self.io.save_song(melody, "jazz", melody, comp, info)
+        for i, _ in enumerate(melodies):
+            melody = melodies[i]
+            fitness = fitnesses[i]
+            if comp_method == "HMM":
+                hmm = HMM(training_chords=training_data, training_melody=melody,
+                order=order, retrain=retrain, chords=chords)
+                comp = hmm.generate_comp(length=32, start=start)
+            else:
+                mc = Markov_Chain(training_data=training_data, order=order, retrain=retrain)
+                mc.train()
+                comp = mc.generate_comp(length=32, start=start)
+            melody = self.convert_notes(melody)
+            comp = self.convert_chords(comp, npb = npb)
+            if saving == True:
+                info = comp_method + \
+                    " Order: " + str(order) + \
+                    " Genetic Algorithm -" \
+                    " Population Size: " + str(ga.population_size) + \
+                    " Generations: " + str(ga.generations) + \
+                    " Fitness: " + str(fitness)
+                self.io.save_song("jazz", melody, comp, info, filename= filename + str(i + 1))
         return melody, comp
 
     def generate_jazz_comp(self, start = "", saving = False, comp_method = "HMM",
