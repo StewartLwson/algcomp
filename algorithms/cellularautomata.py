@@ -1,18 +1,21 @@
 import numpy as np
 
+
 class Cellular_Automata:
-    def __init__(self, starting_state = 1, rule = 150, steps = 100, npb = 4, apply_rule = "all",):
+    def __init__(self, starting_state=1, rule=150, steps=100, npb=4, apply_rule="all",):
         self.rule = rule
         self.npb = npb
         self.apply_rule = "all"
 
         # Binary representation of rule number
-        self.output_pattern = [int(x) for x in np.binary_repr(self.rule, width=8)]
+        self.output_pattern = [int(x)
+                               for x in np.binary_repr(self.rule, width=8)]
 
         # Binary representations of all numbers going down from 8
         self.input_pattern = np.zeros([8, 3])
         for i in range(8):
-            self.input_pattern[i, :] = [int(x) for x in np.binary_repr(7-i, width=3)]
+            self.input_pattern[i, :] = [int(x)
+                                        for x in np.binary_repr(7-i, width=3)]
 
         # Size of Cellular Automata grid defined by steps of lifecrycle of the CA
         self.steps = steps
@@ -42,17 +45,14 @@ class Cellular_Automata:
                     if np.array_equal(self.input_pattern[k, :], self.grid[i, j:j+3]):
                         self.grid[i+1, j+1] = self.output_pattern[k]
 
-
     # Algorithm for generating compositions. The sum of the alive cells every
     # generation is recording and checked if it exists in the scale.
-    def generate_notes(self, scale, bars = 1, npb = 4):
+
+    def generate_notes(self, scale, bars=1, npb=4, rule=150):
         sequence = []
-        if self.apply_rule == "sequence":
-            self.rule = np.random.randint(0, 255)
+        self.rule = rule
         for _ in range(bars):
             bar = []
-            if self.apply_rule == "bar":
-                self.rule = np.random.randint(0, 255)
             self.generate_starting_state()
             self.evolve()
             for generation in self.grid:
@@ -64,11 +64,11 @@ class Cellular_Automata:
                 sequence.append(note)
         return sequence
 
-    def generate_rhythm(self, bars = 1, npb = 4):
+    def generate_rhythm(self, bars=1, npb=4, rule=150):
         sequences = []
         rest = ["-", 0]
+        self.rule = rule
         for _ in range(bars):
-            self.rule = np.random.randint(0, 255)
             self.generate_starting_state()
             self.evolve()
             sequence = []
@@ -80,56 +80,18 @@ class Cellular_Automata:
             sequences.append(sequence)
         return sequences
 
-    # def generate_target_sequence(self, scale, bars = 1, npb = 4):
-    #     target_notes = self.generate_notes(scale, bars = 1, npb = 2)
-    #     melody = [target_notes[0]]
-    #     move_from = scale.index(target_notes[0])
-    #     move_to = scale.index(target_notes[1])
-    #     if move_from < move_to:
-    #         notes = scale[move_from:move_to]
-    #     elif move_from > move_to:
-    #         notes = scale[move_to + 1:move_from + 1]
-    #     else:
-    #         notes = scale
-    #     for _ in range(npb * bars - 2):
-    #         melody.append(np.random.choice(notes))
-    #     melody.append(target_notes[1])
-    #     return melody
-
     def apply_rhythm(self, melody, rhythm):
         for i, note in enumerate(rhythm):
             if note == "-":
                 melody[i] = "-"
         return melody
 
-    def generate_melody(self, scale, bars = 1, npb = 4):
+    def generate_melody(self, scale, bars=1, npb=4, rule=150):
         melody = []
-        rhythms = self.generate_rhythm(bars = 4, npb = npb)
+        rhythms = self.generate_rhythm(bars=4, npb=npb, rule=rule)
         for _ in range(bars):
-            section = self.generate_notes(scale, bars = 1, npb = npb)
+            section = self.generate_notes(scale, bars=1, npb=npb, rule=rule)
             rhythm = rhythms[np.random.choice(range(len(rhythms)))]
             section = self.apply_rhythm(section, rhythm)
             melody += section
         return melody
-
-
-    # def generate_call_response(self, scale, bars = 2, npb = 4):
-    #     call = self.generate_target_sequence(scale, bars, npb)
-    #     call_rhythm = self.generate_rhythm(bars, npb)
-    #     response = self.generate_target_sequence(scale, bars, npb)
-    #     response_rhythm = self.generate_rhythm(bars, npb)
-    #     call = self.apply_rhythm(call, call_rhythm)
-    #     response = self.apply_rhythm(response, response_rhythm)
-    #     melody = call + response
-    #     return melody
-
-    # def generate_blues_melody(self, scale, npb = 4):
-    #     melody1 = self.generate_call_response(scale, bars = 4, npb=npb)
-    #     melody2 = self.generate_call_response(scale, bars = 4, npb=npb)
-    #     melody = melody1 + melody1 + melody2
-    #     return melody
-
-
-
-
-
