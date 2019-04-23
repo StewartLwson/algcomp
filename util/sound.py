@@ -4,6 +4,7 @@ import math
 from util.io import IO
 import os
 
+
 class Sound:
     def __init__(self):
         """
@@ -30,7 +31,7 @@ class Sound:
         else:
             time.sleep(dur)
 
-    def play_chord(self, chord, melody = []):
+    def play_chord(self, chord, melody=[]):
         """
         """
         chord_name = chord[0]
@@ -59,7 +60,6 @@ class Sound:
         for sound in sounds:
             sound.stop()
 
-
     def play_comp(self, comp, bpm=60):
         """
         """
@@ -77,7 +77,7 @@ class Sound:
         for note in melody:
             print(note)
             if note == "-":
-                time.sleep(beat )
+                time.sleep(beat)
             else:
                 self.play_note(note)
         self.pyo.stop()
@@ -90,7 +90,7 @@ class Sound:
             self.bpm = bpm
             melody_start = 0
             for chord in comp:
-                drums = SfPlayer("sound/drums2.wav", speed = bpm/120)
+                drums = SfPlayer("sound/drums2.wav", speed=bpm/120)
                 drums.out()
                 chord_beats = chord[3]
                 melody_fragment = melody[melody_start:melody_start + chord_beats]
@@ -116,12 +116,3 @@ class Sound:
         print(total_note_beats)
         print(total_chord_beats)
         return total_note_beats == total_chord_beats
-
-
-
-
-
-
-
-
-

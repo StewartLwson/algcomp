@@ -1,6 +1,7 @@
 import json
 import hashlib
 
+
 class IO:
     def __init__(self):
         pass
@@ -32,9 +33,10 @@ class IO:
         data = self.load_json(path)
         return data["melody"], data["comp"]
 
-    def save_song(self, folder, melody, comp, info, filename = ""):
+    def save_song(self, folder, melody, comp, info, filename=""):
         if filename == "":
-            filename = str(hashlib.sha1(str(melody).encode("utf-8")).hexdigest())
+            filename = str(hashlib.sha1(
+                str(melody).encode("utf-8")).hexdigest())
         path = "./songs/" + folder + "/" + filename + ".json"
         data = {
             "melody": melody,
