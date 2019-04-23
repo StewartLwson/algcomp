@@ -1,10 +1,12 @@
 import numpy as np
 from algorithms.markovchain import Markov_Chain
 
+
 class HMM():
     """
     """
-    def __init__(self, training_chords, training_melody, retrain = True, order = 1, training = "", chords = {}):
+
+    def __init__(self, training_chords, training_melody, retrain=True, order=1, training="", chords={}):
         self.mc = Markov_Chain(training_chords, retrain, order, training)
         self.mc.train()
 
@@ -31,12 +33,14 @@ class HMM():
 
             chord_octave = 4
             chord_length = 4
-            converted.append((chord_name, chord_type, chord_octave, chord_length))
+            converted.append(
+                (chord_name, chord_type, chord_octave, chord_length))
         return converted
 
     def get_matrix(self):
         matrix = np.zeros([len(self.states), len(self.states)])
-        melody_fragments = [self.training_melody[x:x+self.order * 4] for x in range(0, len(self.training_melody), self.order * 4)]
+        melody_fragments = [self.training_melody[x:x+self.order * 4]
+                            for x in range(0, len(self.training_melody), self.order * 4)]
         arpeggios = []
         chords = self.convert_chords(self.states)
         for chord in chords:
@@ -60,7 +64,7 @@ class HMM():
                 row[i] = col / num
         return matrix
 
-    def generate_comp(self, length, start = ""):
+    def generate_comp(self, length, start=""):
         matrix = self.get_matrix()
         comp = self.mc.generate_comp(length, start, matrix)
         return comp

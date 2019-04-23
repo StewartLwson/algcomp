@@ -4,6 +4,7 @@ import numpy as np
 import json
 import hashlib
 
+
 class Markov_Chain:
     """
     An n-gram Markov Chain that models the changes between chord sequences
@@ -24,8 +25,9 @@ class Markov_Chain:
             The filename of a JSON training file.
 
     """
-    def __init__(self, training_data, retrain = True, order = 1,
-    training = ""):
+
+    def __init__(self, training_data, retrain=True, order=1,
+                 training=""):
         self.order = order
         self.retrain = retrain
         self.training_data = training_data
@@ -51,7 +53,6 @@ class Markov_Chain:
         else:
             self.load_training()
 
-
     def get_states(self):
         """
         Returns a list of all existing states in the training data.
@@ -65,16 +66,15 @@ class Markov_Chain:
         for chords in self.training_data:
             is_starting_state = True
             chunks = [chords[x:x+self.order] for x in range(0,
-            len(chords), self.order)]
+                                                            len(chords), self.order)]
             for chunk in chunks:
-                chunk_string = "".join(chunk)
+                chunk_string = " ".join(chunk)
                 if is_starting_state and chunk_string not in self.starting_states:
                     self.starting_states.append(chunk_string)
                     is_starting_state = False
                 if chunk_string not in states:
                     states.append(chunk_string)
         return sorted(states)
-
 
     def get_transitions(self):
         """
@@ -103,21 +103,33 @@ class Markov_Chain:
         """
         matrix = np.zeros([len(self.states), len(self.states)])
         starting_states = []
-        changes = []
+        transitions = []
 
         for chords in self.training_data:
-            current_changes = [chords[x:x+self.order * 2] for x in range(0,
-            len(chords), self.order)]
-            changes += current_changes
-            starting_states.append(current_changes[0][0])
+            states = []
+            is_starting_state = True
+            chunks = [chords[x:x+self.order] for x in range(0,
+                                                            len(chords), self.order)]
+            for chunk in chunks:
+                chunk_string = " ".join(chunk)
+                if is_starting_state:
+                    starting_states.append(chunk_string)
+                    is_starting_state = False
+                states.append(chunk_string)
+
+            for i in range(0, len(states)):
+                if i < (len(states)) - 1:
+                    transitions.append([states[i], states[i + 1]])
+                else:
+                    transitions.append([states[i]])
 
         self.starting_probabilities = np.zeros([len(self.starting_states)])
 
-        for c in changes:
-            for t in range(len(self.transitions)):
-                for i in range(len(self.transitions[t])):
-                    if c == self.transitions[t][i]:
-                        matrix[t][i] += 1
+        for transition in transitions:
+            for row, row_contents in enumerate(self.transitions):
+                for col, _ in enumerate(row_contents):
+                    if transition == self.transitions[row][col]:
+                        matrix[row][col] += 1
 
         for i, state in enumerate(starting_states):
             for j, possible_state in enumerate(self.starting_states):
@@ -145,7 +157,7 @@ class Markov_Chain:
         """
 
         filename = str(hashlib.sha1(str(self.training_data).encode("utf-8"))
-        .hexdigest())
+                       .hexdigest())
         path = "./training/" + filename + ".json"
 
         data = {
@@ -173,7 +185,7 @@ class Markov_Chain:
         self.transitions = data["transitions"]
         self.matrix = data["matrix"]
 
-    def generate_comp(self, length, start = "", matrix = []):
+    def generate_comp(self, length, start="", matrix=[]):
         """
         Generates compositions based on training by appending states to the
         overall composition for a desired length.
@@ -189,12 +201,15 @@ class Markov_Chain:
         if matrix == []:
             matrix = self.matrix
         if start == "":
-            current = np.random.choice(self.starting_states, replace=True, p=self.starting_probabilities)
+            current = np.random.choice(
+                self.starting_states, replace=True, p=self.starting_probabilities)
         else:
             current = start
         comp = []
         comp.append(current)
         row = 0
+
+        length = int(length / self.order)
 
         for _ in range(length - 1):
             for state in self.states:
@@ -204,7 +219,10 @@ class Markov_Chain:
                     for transition in self.transitions[row]:
                         possible.append(transition[1])
             change = np.random.choice(possible, replace=True,
-            p=matrix[row])
+                                      p=matrix[row])
             current = change
             comp.append(current)
-        return comp
+        final_comp = []
+        for sequence in comp:
+            final_comp += sequence.split(' ')
+        return final_comp
