@@ -6,6 +6,7 @@ import numpy as np
 import statistics
 import operator
 
+
 class Genetic_Algorithm:
     """
     A Genetic Algorithm that evolves musical sequences according to a fitness
@@ -36,25 +37,32 @@ class Genetic_Algorithm:
             The chance a mutation will occur when generating children.
 
     """
-    def __init__(self, scale, style, generations = 5, population_size = 20,
-    best_sample = 8, lucky_few = 2, rule = 150, bars = 1, npb = 4, chance = 50, melody_method="CA"):
+
+    def __init__(self, scale, style, other_scale=[], generations=5, population_size=20,
+                 rule=150, change_rule=False, bars=1, npb=4, chance=20, melody_method="CA", history_delimiter=5):
         self.scale = scale
+        self.other_scale = other_scale
         self.style = style
         self.npb = npb
         self.rule = rule
         self.population_size = population_size
         self.generations = generations
         self.melody_method = melody_method
-        self.population = self.generate_first_population(scale, bars, npb, rule)
-        self.best_sample = best_sample
+        self.population = self.generate_first_population(
+            scale, bars, npb, rule, change_rule)
         self.chance = chance
-        self.lucky_few = lucky_few
+        self.history = []
         for i in range(generations):
             print("Evolving Generation " + str(i + 1))
             self.parents = self.tournament_selection(self.population)
             self.population = self.multipoint_crossover(self.parents)
             stats = self.get_population_stats()
-            print("Most Fit:" + str(stats[0]) + ", Median:" + str(stats[1]) + ", Least Fit:" + str(stats[2]))
+            print("Most Fit:" + str(stats[0]) + ", Median:" +
+                  str(stats[1]) + ", Least Fit:" + str(stats[2]))
+            if i % history_delimiter == 0:
+                population = self.sort_population()
+                fitnesses = self.get_fitnesses(population)
+                self.history.append((population, fitnesses))
         self.population = self.sort_population()
 
     def get_population(self):
@@ -62,10 +70,17 @@ class Genetic_Algorithm:
         Returns the current population.
 
         """
+        return self.population, self.get_fitnesses(self.population)
+
+    def get_history(self):
+        return self.history
+
+    def get_fitnesses(self, population):
         fitnesses = []
-        for individual in self.population:
-            fitnesses.append(self.fitness(scale = self.scale, melody = individual, style = self.style))
-        return self.population, fitnesses
+        for individual in population:
+            fitnesses.append(self.fitness(scale=self.scale,
+                                          melody=individual, style=self.style))
+        return fitnesses
 
     def musical_fitness(self, scale, melody):
         """
@@ -82,12 +97,19 @@ class Genetic_Algorithm:
         """
         score = 0
         for c, v in enumerate(melody):
-            if c == 0: # on first note of the sequence
-                score += 1 if v == scale[0] else -1 # check if note is root
-            if c == len(melody) - 1: # on last note of sequence
-                score += 1 if v == scale[0] else -1 # check if note is root
-            if c % 2 == 0: # on strong beats
-                score += 1 if v != "-" else -1 # check if note is rest
+            rest_count = 0
+            if c == 0:  # on first note of the sequence
+                score += 1 if v == scale[0] else -1  # check if note is root
+            if c == len(melody) - 1:  # on last note of sequence
+                score += 1 if v == scale[0] else -1  # check if note is root
+            if c % 2 == 0:  # on strong beats
+                score += 1 if v != "-" else -1  # check if note is rest
+            if v == "-":
+                rest_count += 1
+            else:
+                rest_count = 0
+            if rest_count > (self.npb / 2):
+                score -= self.npb / 2
         return score
 
     def blues_fitness(self, scale, melody):
@@ -111,13 +133,22 @@ class Genetic_Algorithm:
                 score += 1 if v != scale[3] else -1
             if v == scale[3] and c < len(melody) - 1:
                 if melody[c + 1] == scale[2] or melody[c + 1] == scale[4] or \
-                melody[c - 1] == scale[2] or melody[c - 1] == scale[4]:
+                        melody[c - 1] == scale[2] or melody[c - 1] == scale[4]:
                     score += 1
                 else:
                     score -= 1
         return score
 
-    def fitness(self, scale, melody, style):
+    def scale_fitness(self, scale, melody):
+        score = 0
+        for c, v in enumerate(melody):
+            if v != "-":
+                score += 1 if v in scale else -1
+            else:
+                score += 1
+        return score
+
+    def fitness(self, scale, melody, style, other_scale=[]):
         """
         Returns a fitness for a given melody based score given by the
         fitness sub-functions. This total score is then normalized
@@ -137,10 +168,12 @@ class Genetic_Algorithm:
         score += self.musical_fitness(scale, melody)
         if style == "blues":
             score += self.blues_fitness(scale, melody)
+        elif style == "chromatic":
+            score += self.scale_fitness(other_scale, melody)
 
         return score
 
-    def generate_first_population(self, scale, bars, npb, rule):
+    def generate_first_population(self, scale, bars, npb, rule, change_rule=False):
         """
         Returns an initial population to be evolved by the Genetic Algorithm.
 
@@ -155,20 +188,25 @@ class Genetic_Algorithm:
         """
         population = []
         for i in range(self.population_size):
-            print("Generating Initial Population: " + str(i + 1) + "/" + str(self.population_size))
+            print("Generating Initial Population: " +
+                  str(i + 1) + "/" + str(self.population_size))
             if self.melody_method == "CA":
                 ca = Cellular_Automata()
-                melody = ca.generate_melody(scale, bars, npb)
+                melody = ca.generate_melody(
+                    scale=scale, bars=bars, npb=npb, rule=rule)
+                if(change_rule):
+                    rule = np.random.randint(1, 255)
             elif self.melody_method == "RS":
                 rs = Random_String()
-                melody = rs.generate_melody(scale = scale, bars = bars, npb = npb)
+                melody = rs.generate_melody(scale=scale, bars=bars, npb=npb)
             population.append(melody)
         return population
 
     def get_individual_fitness_pairs(self):
         individual_fitness_pairs = []
         for sequence in self.population:
-            fitness = self.fitness(scale = self.scale, melody = sequence, style = self.style)
+            fitness = self.fitness(
+                scale=self.scale, melody=sequence, style=self.style)
             individual_fitness_pairs.append((sequence, fitness))
         return individual_fitness_pairs
 
@@ -180,9 +218,10 @@ class Genetic_Algorithm:
         """
         individual_fitness_pairs = self.get_individual_fitness_pairs()
         sorted_population = []
+
         def sortSecond(val):
             return val[1]
-        individual_fitness_pairs.sort(key = sortSecond)
+        individual_fitness_pairs.sort(key=sortSecond, reverse=True)
         for pair in individual_fitness_pairs:
             sorted_population.append(pair[0])
         return sorted_population
@@ -194,30 +233,17 @@ class Genetic_Algorithm:
             fitnesses.append(pair[1])
         return max(fitnesses), statistics.median(fitnesses), min(fitnesses)
 
-
     def best_selection(self, population):
         """
         Returns a sample of the fittest individuals in a population and a
         random amount of lucky individuals outside of the fittest.
 
         """
-        leftover = []
-        if len(population) % 2 != 0:
-            population = population[:len(population) - 1]
-            leftover = population[len(population) - 1]
-
-        sorted_population = {}
-        next_gen = []
-        for sequence in population:
-            sorted_population[str(sequence)] = self.fitness(scale = self.scale, melody = sequence, style = self.style)
-        sorted_population = sorted(sorted_population.items(), key = operator.itemgetter(1), reverse = True)
-        for i in range(self.best_sample):
-            next_gen.append(sorted_population[i][0])
-        for i in range(self.lucky_few):
-            next_gen.append(sorted_population[np.random.randint(self.best_sample, self.population_size - 1)][0])
-        next_gen.append(leftover)
-        np.random.shuffle(next_gen)
-        return next_gen
+        winners = []
+        population = self.sort_population()
+        cutoff = len(population) - int(len(population) * 0.5)
+        winners = population[cutoff:len(population)]
+        return winners
 
     def tournament_selection(self, population):
         """
@@ -238,8 +264,10 @@ class Genetic_Algorithm:
         tournaments = [population[x:x+2] for x in range(0, len(population), 2)]
 
         for tournament in tournaments:
-            fitness1 = self.fitness(scale = self.scale, melody = tournament[0], style = self.style)
-            fitness2 = self.fitness(scale = self.scale, melody = tournament[1], style = self.style)
+            fitness1 = self.fitness(
+                scale=self.scale, melody=tournament[0], style=self.style, other_scale=self.other_scale)
+            fitness2 = self.fitness(
+                scale=self.scale, melody=tournament[1], style=self.style, other_scale=self.other_scale)
             best_score = max(fitness1, fitness2)
             if fitness1 == best_score:
                 winners.append(tournament[0])
@@ -326,11 +354,10 @@ class Genetic_Algorithm:
                 The chance that the mutation will occur.
 
         """
-        index = np.random.randint(0, len(individual))
-        if np.random.randint(0, 100) < self.chance:
-            individual[index] = np.random.choice(self.scale)
+
+        for x in range(0, len(individual), self.npb):
+            bar = individual[x:x+self.npb]
+            index = np.random.randint(0, len(bar))
+            if np.random.randint(0, 100) < self.chance:
+                bar[index] = np.random.choice(self.scale)
         return individual
-
-
-
-
