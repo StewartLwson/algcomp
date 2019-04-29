@@ -64,14 +64,10 @@ class Markov_Chain:
         """
         states = []
         for chords in self.training_data:
-            is_starting_state = True
             chunks = [chords[x:x+self.order] for x in range(0,
                                                             len(chords), self.order)]
             for chunk in chunks:
                 chunk_string = " ".join(chunk)
-                if is_starting_state and chunk_string not in self.starting_states:
-                    self.starting_states.append(chunk_string)
-                    is_starting_state = False
                 if chunk_string not in states:
                     states.append(chunk_string)
         return sorted(states)
@@ -109,7 +105,7 @@ class Markov_Chain:
             states = []
             is_starting_state = True
             chunks = [chords[x:x+self.order] for x in range(0,
-                                                            len(chords), self.order)]
+                    len(chords), self.order)]
             for chunk in chunks:
                 chunk_string = " ".join(chunk)
                 if is_starting_state:
@@ -123,7 +119,7 @@ class Markov_Chain:
                 else:
                     transitions.append([states[i]])
 
-        self.starting_probabilities = np.zeros([len(self.starting_states)])
+        self.starting_probabilities = np.zeros([len(self.states)])
 
         for transition in transitions:
             for row, row_contents in enumerate(self.transitions):
@@ -131,21 +127,22 @@ class Markov_Chain:
                     if transition == self.transitions[row][col]:
                         matrix[row][col] += 1
 
-        for i, state in enumerate(starting_states):
-            for j, possible_state in enumerate(self.starting_states):
+        for i, state in enumerate(self.states):
+            for j, possible_state in enumerate(starting_states):
                 if state == possible_state:
                     self.starting_probabilities[j] += 1
+
+        num = sum(self.starting_probabilities)
+        for i, prob in enumerate(self.starting_probabilities):
+            self.starting_probabilities[i] = prob / num
 
         for m in range(len(matrix)):
             num = sum(matrix[m])
             if int(num) is not 0:
                 for i in range(len(matrix[m])):
                     matrix[m][i] = (matrix[m][i] / num)
-
-        num = sum(self.starting_probabilities)
-        for i, prob in enumerate(self.starting_probabilities):
-            self.starting_probabilities[i] = prob / num
-
+            else:
+                matrix[m] = self.starting_probabilities
         return matrix
 
     def save_training(self):
@@ -202,7 +199,7 @@ class Markov_Chain:
             matrix = self.matrix
         if start == "":
             current = np.random.choice(
-                self.starting_states, replace=True, p=self.starting_probabilities)
+                self.states, replace=True, p=self.starting_probabilities)
         else:
             current = start
         comp = []

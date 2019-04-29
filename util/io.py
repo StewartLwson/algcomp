@@ -28,8 +28,8 @@ class IO:
         }
         self.save_json(path, data)
 
-    def load_song(self, filename, style):
-        path = "./songs/" + style + "/" + filename + ".json"
+    def load_song(self, filename, folder):
+        path = "./songs/" + folder + "/" + filename + ".json"
         data = self.load_json(path)
         return data["melody"], data["comp"]
 

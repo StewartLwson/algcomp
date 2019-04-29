@@ -1,9 +1,11 @@
 from algorithms.markovchain import Markov_Chain
 from algorithms.hiddenmarkovmodel import HMM
 from algorithms.cellularautomata import Cellular_Automata
+from algorithms.randomstring import Random_String
 from algorithms.geneticalgorithm import Genetic_Algorithm
 from util.io import IO
 
+import numpy as np
 
 class MusicGenerator():
     """
@@ -117,103 +119,189 @@ class MusicGenerator():
         mc.train()
         return mc.get_states(), mc.get_matrix()
 
-    def generate_blues(self, folder, start="", saving=True,
-                       melody_method="CA", order=1, rule=150,
+    def generate_melody(self, scale, bars, npb, melody_method, rule, change_rule):
+        if melody_method == "CA":
+            ca = Cellular_Automata()
+            melody = ca.generate_melody(
+                scale=scale, bars=bars, npb=npb, rule=rule)
+            if(change_rule):
+                rule = np.random.randint(1, 255)
+        elif melody_method == "RS":
+            rs = Random_String()
+            melody = rs.generate_melody(scale=scale, bars=bars, npb=npb)
+        return melody
+
+    def generate_comp(self, bars, comp_method, training_data, order, training_melody=[]):
+        chords = self.io.load_chords()
+        if comp_method == "MC":
+            mc = Markov_Chain(training_data=training_data, order=order, retrain=True)
+            mc.train()
+            comp = mc.generate_comp(length=bars)
+        elif comp_method == "HMM":
+            hmm = HMM(training_chords=training_data, training_melody=training_melody,
+                      order=order, retrain=True, chords=chords)
+            comp = hmm.generate_comp(length=bars)
+        return comp
+
+    def generate_blues(self, folder, saving=True,
+                       melody_method="CA", rule=150,
                        change_rule=False, retrain=True, npb=8,
-                       key="C", population=10, generations=30, filename="",
+                       key="C", population_size=10, generations=30, filename="",
                        amount=100, history_mode = True):
         """
         """
-        if amount > population:
-            amount = population
+        if amount > population_size:
+            amount = population_size
         training_data = self.parse_blues(
             self.io.load_training_data("12bblues"), key)
         scale = self.scales["minor blues"][key]
-        ga = Genetic_Algorithm(scale=scale,
-                               bars=12,
-                               style="blues",
-                               population_size=population,
-                               generations=generations,
-                               npb=npb,
-                               rule=rule,
-                               change_rule=change_rule,
-                               melody_method=melody_method)
-        history = ga.get_history()
-        if not history_mode:
-            history = [ga.get_population()]
+        history = self.generate_blues_melodies(scale=scale,
+                                               population_size=population_size,
+                                               generations=generations,
+                                               rule=rule,
+                                               change_rule=change_rule,
+                                               melody_method=melody_method,
+                                               history_mode=history_mode)
         for c, v in enumerate(history):
             melodies, fitnesses = v
             for i in range(amount):
                 melody = melodies[i]
                 fitness = fitnesses[i]
-                mc = Markov_Chain(training_data=training_data,
-                                    order=order, retrain=retrain)
-                mc.train()
+                comp = self.generate_blues_comp(training_data)
                 print("Generating Comp for Melody " + str(i + 1))
-                comp = mc.generate_comp(length=12, start=start)
                 melody = self.convert_notes(melody)
                 comp = self.convert_chords(comp, npb=npb)
                 if saving == True:
                     info = "MC -" + \
-                        " Order: " + str(order) + \
+                        " Order: " + str(4) + \
                         str(melody_method) + \
                         " Genetic Algorithm -" \
-                        " Population Size: " + str(ga.population_size) + \
-                        " Generations: " + str(ga.generations) + \
+                        " Population Size: " + str(population_size) + \
+                        " Generations: " + str(generations) + \
                         " Fitness: " + str(fitness)
                     self.io.save_song(
                         folder, melody, comp, info, filename="Gen " + str(c + 1) + filename + str(i + 1))
         return melody, comp
 
-    def generate_jazz(self, folder, start="", saving=True, comp_method="HMM",
-                      melody_method="CA", order=1, rule=150, change_rule=False, retrain=True, bars=32, npb=8, key="C", population=10,
-                      generations=30, filename="", amount=100, history_mode = False):
-        """
-        """
-        if amount > population:
-            amount = population
-        training_data = self.parse_standards(
-            self.io.load_training_data("standards"))
-        chords = self.io.load_chords()
-        scale = self.scales["chromatic"][key]
-        other_scale = self.scales["major"][key]
+    def generate_blues_comp(self, training_data):
+        comp = self.generate_comp(bars=12, comp_method="MC", training_data=training_data, order=4)
+        return comp
+
+    def generate_blues_melodies(self, scale, population_size, generations,
+                              rule, change_rule, melody_method, history_mode):
         ga = Genetic_Algorithm(scale=scale,
-                               bars=bars,
-                               style="chromatic",
-                               population_size=population,
+                               bars=12,
+                               style="blues",
+                               population_size=population_size,
                                generations=generations,
-                               other_scale=other_scale,
-                               npb=npb,
+                               npb=8,
                                rule=rule,
                                change_rule=change_rule,
                                melody_method=melody_method)
         history = ga.get_history()
         if not history_mode:
             history = [ga.get_population()]
+        return history
+
+    def generate_blues_melody(self, key, bars, npb, melody_method, rule, change_rule):
+        scale = self.scales["minor blues"][key]
+        melody = self.generate_melody(scale=scale,
+                                      bars=bars,
+                                      npb=npb,
+                                      melody_method=melody_method,
+                                      rule=rule,
+                                      change_rule=change_rule)
+        return melody
+
+    def generate_jazz(self, folder="jazz", saving=True,
+                      melody_method="CA", rule=150, change_rule=False, bars=32, npb=8, key="C", population_size=10,
+                      generations=30, filename="Jazz", amount=100, history_mode=False):
+        """
+        """
+        if amount > population_size:
+            amount = population_size
+        scale = self.scales["major"][key]
+        history = self.generate_jazz_melodies(population_size=population_size,
+                                              generations=generations,
+                                              other_scale=scale,
+                                              key=key,
+                                              melody_method=melody_method,
+                                              history_mode=history_mode,
+                                              rule=rule,
+                                              change_rule=change_rule,
+                                              plot=True)
+
         for c, v in enumerate(history):
             melodies, fitnesses = v
             for i in range(amount):
                 melody = melodies[i]
                 fitness = fitnesses[i]
-                if comp_method == "HMM":
-                    hmm = HMM(training_chords=training_data, training_melody=melody,
-                              order=order, retrain=retrain, chords=chords)
-                    print("Generation Comp for Melody " + str(i + 1))
-                    comp = hmm.generate_comp(length=bars, start=start)
-                else:
-                    mc = Markov_Chain(training_data=training_data,
-                                      order=order, retrain=retrain)
-                    mc.train()
-                    comp = mc.generate_comp(length=bars, start=start)
+                comp = self.generate_jazz_comp(training_melody=melody)
+                print("Generation Comp for Melody " + str(i + 1))
                 melody = self.convert_notes(melody)
                 comp = self.convert_chords(comp, npb=npb)
                 if saving == True:
-                    info = comp_method + \
-                        " Order: " + str(order) + \
+                    info = "HMM" + \
+                        " Order: " + str(1) + \
                         " Genetic Algorithm -" \
-                        " Population Size: " + str(ga.population_size) + \
-                        " Generations: " + str(ga.generations) + \
+                        " Population Size: " + str(population_size) + \
+                        " Generations: " + str(generations) + \
                         " Fitness: " + str(fitness)
                     self.io.save_song(
                         folder, melody, comp, info, filename="Gen " + str(c + 1) + filename + str(i + 1))
         return melody, comp
+
+    def generate_jazz_comp(self, bars=16, training_melody=[], comp_method="HMM"):
+        training_data = self.parse_standards(
+            self.io.load_training_data("standards"))
+        comp = self.generate_comp(bars=16, comp_method=comp_method,
+                                  training_data=training_data, training_melody=training_melody,
+                                  order=1)
+        return comp
+
+    def get_best_jazz_melody(self, key, population_size, generations, melody_method,
+                             rule=1, change_rule=False):
+        scale = self.scales["chromatic"][key]
+        melodies = self.generate_jazz_melodies(scale=scale,
+                                               population_size=population_size,
+                                               generations=generations,
+                                               rule=rule,
+                                               change_rule=change_rule,
+                                               melody_method=melody_method,
+                                               history_mode=False)
+        return melodies[0][0][0]
+
+    def generate_jazz_melodies(self, other_scale, population_size, generations,
+                               melody_method, key, history_mode, rule=1, change_rule=False, plot=True):
+        scale = self.scales["chromatic"][key]
+        ga = Genetic_Algorithm(scale=scale,
+                               bars=16,
+                               other_scale=other_scale,
+                               style="chromatic",
+                               population_size=population_size,
+                               generations=generations,
+                               npb=8,
+                               rule=rule,
+                               change_rule=change_rule,
+                               melody_method=melody_method)
+        ga.evolve(plot=plot)
+        history = ga.get_history()
+        if not history_mode:
+            history = [ga.get_population()]
+        return history
+
+    def generate_jazz_melody(self, key, bars, npb, melody_method, chromatic,
+                             rule=1, change_rule=False):
+        """
+        """
+        if chromatic:
+            scale = self.scales["chromatic"][key]
+        else:
+            scale = self.scales["major"][key]
+        melody = self.generate_melody(scale=scale,
+                                      bars=bars,
+                                      npb=npb,
+                                      melody_method=melody_method,
+                                      rule=rule,
+                                      change_rule=change_rule)
+        return melody

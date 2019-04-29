@@ -5,6 +5,7 @@ from algorithms.randomstring import Random_String
 import numpy as np
 import statistics
 import operator
+import matplotlib.pyplot as plt
 
 
 class Genetic_Algorithm:
@@ -38,31 +39,52 @@ class Genetic_Algorithm:
 
     """
 
-    def __init__(self, scale, style, other_scale=[], generations=5, population_size=20,
-                 rule=150, change_rule=False, bars=1, npb=4, chance=20, melody_method="CA", history_delimiter=5):
+    def __init__(self, scale, style, other_scale=[], generations=5,
+                 population_size=20, rule=150, change_rule=False,
+                 bars=1, npb=4, chance=20, melody_method="CA",
+                 history_delimiter=5):
         self.scale = scale
         self.other_scale = other_scale
         self.style = style
+        self.bars = bars
         self.npb = npb
         self.rule = rule
+        self.change_rule = change_rule
         self.population_size = population_size
         self.generations = generations
         self.melody_method = melody_method
-        self.population = self.generate_first_population(
-            scale, bars, npb, rule, change_rule)
         self.chance = chance
         self.history = []
-        for i in range(generations):
+        self.history_delimiter = history_delimiter
+
+    def evolve(self, plot = False):
+        self.population = self.generate_first_population(
+            self.scale, self.bars, self.npb, self.rule, self.change_rule)
+        most = []
+        median = []
+        least = []
+        for i in range(self.generations):
             print("Evolving Generation " + str(i + 1))
             self.parents = self.tournament_selection(self.population)
             self.population = self.multipoint_crossover(self.parents)
             stats = self.get_population_stats()
+            most.append(stats[0])
+            median.append(stats[1])
+            least.append(stats[2])
             print("Most Fit:" + str(stats[0]) + ", Median:" +
                   str(stats[1]) + ", Least Fit:" + str(stats[2]))
-            if i % history_delimiter == 0:
+            if i % self.history_delimiter == 0:
                 population = self.sort_population()
                 fitnesses = self.get_fitnesses(population)
                 self.history.append((population, fitnesses))
+        if plot:
+            plt.plot(most)
+            plt.plot(median)
+            plt.plot(least)
+            plt.title('Fitness of Melodies During GA Evolution')
+            plt.xlabel('Generations')
+            plt.ylabel('Fitness')
+            plt.show()
         self.population = self.sort_population()
 
     def get_population(self):
@@ -141,7 +163,7 @@ class Genetic_Algorithm:
 
     def scale_fitness(self, scale, melody):
         score = 0
-        for c, v in enumerate(melody):
+        for _, v in enumerate(melody):
             if v != "-":
                 score += 1 if v in scale else -1
             else:
@@ -302,7 +324,7 @@ class Genetic_Algorithm:
                 split1 = couple[c % 2][0:point]
                 split2 = couple[(c + 1) % 2][point:12*self.npb]
                 child = split1 + split2
-                child = self.mutate(child, self.chance)
+                child = self.mutate(child)
                 children.append(child)
         children.append(leftover)
         return children

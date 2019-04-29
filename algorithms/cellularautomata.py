@@ -53,7 +53,6 @@ class Cellular_Automata:
         self.rule = rule
         for _ in range(bars):
             bar = []
-            self.generate_starting_state()
             self.evolve()
             for generation in self.grid:
                 index = int(sum(generation) % len(scale))

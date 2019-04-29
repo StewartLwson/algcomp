@@ -42,6 +42,7 @@ class HMM():
         melody_fragments = [self.training_melody[x:x+self.order * 4]
                             for x in range(0, len(self.training_melody), self.order * 4)]
         arpeggios = []
+        print(self.states)
         chords = self.convert_chords(self.states)
         for chord in chords:
             chord_notes = self.chords[chord[1]][chord[0]]
